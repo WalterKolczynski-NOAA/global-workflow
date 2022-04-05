@@ -27,11 +27,11 @@ case $machine in
 esac
 
 # Number of enkf members per fcst job
-export NMEM_EFCSGRP=2
-export RERUN_EFCSGRP="NO"
+export NMEM_EFCSGRP=${NMEM_EFCSGRP:-2}
+export RERUN_EFCSGRP=${RERUN_EFCSGRP:-"NO"}
 
 # Turn off inline UPP for EnKF forecast
-export WRITE_DOPOST=".false."
+export WRITE_DOPOST=${WRITE_DOPOST:-".false."}
 
 # Stochastic physics parameters (only for ensemble forecasts)
 export DO_SKEB="YES"

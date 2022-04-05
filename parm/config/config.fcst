@@ -24,16 +24,14 @@ for component in WAVE OCN ICE AERO; do
   fi
 done
 
-# Get task specific resources
-. $EXPDIR/config.resources fcst
-export domains_stack_size="16000000"
-
-
 if [ $DONST = "YES" ]; then
     . $EXPDIR/config.nsst
 fi
 
-export print_esmf=".false."
+# Get task specific resources
+. $EXPDIR/config.resources fcst
+export domains_stack_size=${domains_stack_size:-"16000000"}
+
 export esmf_profile=".false."
 
 #######################################################################
