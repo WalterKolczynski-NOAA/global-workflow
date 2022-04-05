@@ -1,0 +1,13 @@
+mode: forecast-only
+idate: 2020083000
+edate: 2020083000
+app: S2SW
+resdet: 384
+pslot: test
+
+# Any variables listed under settings will be written
+#  to a config.case file that will override settings 
+#  in other config files
+settings:
+  a: 1
+  b: hello

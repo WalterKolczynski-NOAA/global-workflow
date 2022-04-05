@@ -1,0 +1,3 @@
+comrot: /scratch2/NCEPDEV/ensemble/noscrub/Walter.Kolczynski/global-workflow
+expdir: /scratch2/NCEPDEV/ensemble/save/Walter.Kolczynski/global-workflow/expdir
+icsdir: /scratch2/NCEPDEV/ensemble/noscrub/Walter.Kolczynski/global-workflow/FV3ICS

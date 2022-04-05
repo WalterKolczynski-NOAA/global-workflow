@@ -1,0 +1,53 @@
+mode: forecast-only
+idate: 2020083000
+edate: 2020083000
+app: S2SAW
+resdet: 384
+pslot: test
+
+# Any variables listed under settings will be written
+#  to a config.case file that will override settings 
+#  in other config files
+settings:
+  # config.base
+  # CASE: C384
+  FHMAX_GFS_00: 48
+  FHMAX_GFS_06: 48
+  FHMAX_GFS_12: 48
+  FHMAX_GFS_18: 48
+  FHOUT_GFS: 6
+  FHOUT_HF_GFS: -1
+
+  # config.fcst
+  min_seaice: 1.0e-6
+  use_cice_alb: .true.
+
+  # config.fv3
+  DELTIM: 300
+  layout_x_gfs: 24
+  layout_y_gfs: 16
+  WRITE_GROUP_GFS: 1
+  WRTTASK_PER_GROUP_GFS: 80
+  WRTIOBUF: 32M
+  MEDPETS: 300
+
+  # config.wave
+  waveGRD: gwes_30m
+  waveesmfGRD: ' '
+  waveinterpGRD: ' '
+  wavepostGRD: gwes_30m
+  waveGRDN: 1
+  waveGRDG: 10
+  USE_WAV_RMP: NO
+  FHOUT_HF_WAV: 3
+  DTPNT_WAV: 10800
+  OUTPARS_WAV: WND CUR ICE HS T01 T02 DIR FP DP PHS PTP PDIR CHA
+  DOBNDPNT_WAVE: NO
+
+  # config.waveprep
+  IOSRV: 1
+
+  # config.arch
+  export ARCH_GAUSSIAN: YES
+  export ARCH_GAUSSIAN_FHMAX: ${FHMAX_GFS_00}
+  export ARCH_GAUSSIAN_FHINC: ${FHOUT_GFS}
