@@ -1,0 +1,4 @@
+# Pylint settings
+
+[MESSAGES CONTROL]
+disable=E501
