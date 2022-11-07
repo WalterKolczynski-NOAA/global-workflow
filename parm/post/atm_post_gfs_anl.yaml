@@ -1,0 +1,15 @@
+include:
+  - !INC ${PARMpost}/atm_post.yaml
+
+atm_file: !ENV ${COMIN}/${RUN}.${cycle}.atmanl.nc
+sfc_file: !ENV ${COMIN}/${RUN}.${cycle}.sfcanl.nc
+trigger_file: !ENV ${COMIN}/${RUN}.${cycle}.atmanl.nc
+
+igen: anal_gfs
+flat_file: !ENV ${PARMpost}/postxconfig-NT-GFS-ANL.txt
+ctrl_file: !ENV ${PARMpost}/postcntrl_gfs_anl.xml
+grib2_table: !ENV ${g2tmpl_ROOT}/share/params_grib2_tbl_new
+
+dbn_signals:
+  GFS_SA: !ENV ${COMIN}/${RUN}.${cycle}.atmanl.nc
+  GFS_MSC_sfcanal: !ENV ${COMIN}/${RUN}.${cycle}.sfcanl.nc

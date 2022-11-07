@@ -25,10 +25,9 @@ fi
 
 
 #---------------------------------------------------------------
-for fhr in ${fhrlst}; do
-    export post_times=${fhr}
-    export job="post${post_times}"
-    export jobid="${job}.$$"
+
+for fhr in $fhrlst; do
+    export fhr
     ${HOMEgfs}/jobs/JGLOBAL_ATMOS_POST
     status=$?
     [[ ${status} -ne 0 ]] && exit ${status}

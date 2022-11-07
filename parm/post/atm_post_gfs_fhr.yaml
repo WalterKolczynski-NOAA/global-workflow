@@ -1,0 +1,11 @@
+include:
+  - !INC ${PARMpost}/atm_post.yaml
+
+atm_file: !ENV ${COMIN}/${RUN}.${cycle}.atmf${fhr}.nc
+sfc_file: !ENV ${COMIN}/${RUN}.${cycle}.sfcf${fhr}.nc
+trigger_file: !ENV ${COMIN}/${CDUMP}.t${cyc}z.logf${fhr}.txt
+
+igen: gfs_avn
+flat_file: !ENV ${PARMpost}/postxconfig-NT-GFS.txt
+ctrl_file: !ENV ${PARMpost}/postcntrl_gfs.xml
+grib2_table: !ENV ${g2tmpl_ROOT}/share/params_grib2_tbl_new

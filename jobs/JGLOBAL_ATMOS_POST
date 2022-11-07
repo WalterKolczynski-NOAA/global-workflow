@@ -2,6 +2,7 @@
 
 source "${HOMEgfs}/ush/preamble.sh"
 
+
 ##############################################
 # make temp directory
 ##############################################
@@ -78,10 +79,9 @@ fi
 ##############################################
 export APRUNP=${APRUN:-${APRUN_NP}}
 export RERUN=${RERUN:-NO}
-export HOMECRTM=${HOMECRTM:-${PACKAGEROOT}/lib/crtm/${crtm_ver}}
-export FIXCRTM=${CRTM_FIX:-${HOMECRTM}/fix}
+
 export PARMpost=${PARMpost:-${HOMEgfs}/parm/post}
-export INLINE_POST=${WRITE_DOPOST:-".false."}
+# export INLINE_POST=${WRITE_DOPOST:-".false."}
 
 export COMIN=${COMIN:-${ROTDIR}/${RUN}.${PDY}/${cyc}/atmos}
 export COMOUT=${COMOUT:-${ROTDIR}/${RUN}.${PDY}/${cyc}/atmos}
@@ -90,46 +90,14 @@ export COMOUT=${COMOUT:-${ROTDIR}/${RUN}.${PDY}/${cyc}/atmos}
 [[ ! -d "${COMOUT}" ]] && mkdir -m 775 -p "${COMOUT}"
 # shellcheck disable=
 
-if [ "${RUN}" = gfs ];then
-  export FHOUT_PGB=${FHOUT_GFS:-3} #Output frequency of gfs pgb file at 1.0 and 0.5 deg.
-fi
-if [ "${RUN}" = gdas ]; then
-  export IGEN_GFS="gfs_avn"
-  export IGEN_ANL="anal_gfs"
-  export IGEN_FCST="gfs_avn"
-  export IGEN_GDAS_ANL="anal_gdas"
-  export FHOUT_PGB=${FHOUT:-1} #Output frequency of gfs pgb file at 1.0 and 0.5 deg.
-fi
-
-if [ "${GRIBVERSION}" = grib2 ]; then
-  export IGEN_ANL="anal_gfs"
-  export IGEN_FCST="gfs_avn"
-  export IGEN_GFS="gfs_avn"
-fi
-
-#######################################
-# Specify Restart File Name to Key Off
-#######################################
-export restart_file=${COMIN}/${RUN}.t${cyc}z.logf
-
-####################################
-# Specify Timeout Behavior of Post
-#
-# SLEEP_TIME - Amount of time to wait for
-#              a restart file before exiting
-# SLEEP_INT  - Amount of time to wait between
-#              checking for restart files
-####################################
-export SLEEP_TIME=900
-export SLEEP_INT=5
-
-
 ###############################################################
 # Run relevant exglobal script
-
-"${SCRgfs}/ex${RUN}_atmos_post.sh"
+###############################################################
+"${HOMEgfs}/scripts/exglobal_atmos_post.sh"
 status=$?
-(( status != 0 )) && exit "${status}"
+if (( status != 0 )); then
+  exit "${status}"
+fi  
 
 ##############################################
 # End JOB SPECIFIC work
