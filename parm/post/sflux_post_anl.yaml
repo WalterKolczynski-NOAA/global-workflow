@@ -1,0 +1,10 @@
+include:
+  - !INC ${PARMpost}/sflux_post.yaml
+
+atm_file: !ENV ${COMIN}/${RUN}.${cycle}.atmanl.nc
+sfc_file: !ENV ${COMIN}/${RUN}.${cycle}.sfcanl.nc
+trigger_file: !ENV ${COMIN}/${RUN}.${cycle}.atmanl.nc
+
+igen: anal_gfs
+flat_file: !ENV ${PARMpost}/postxconfig-NT-GFS-FLUX-ANL.txt
+grib2_table: !ENV ${g2tmpl_ROOT}/share/params_grib2_tbl_new

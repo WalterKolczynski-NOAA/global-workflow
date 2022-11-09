@@ -1,15 +1,14 @@
 include:
-  - !INC ${PARMpost}/atm_post.yaml
+  - !INC ${PARMpost}/sflux_post.yaml
 
 atm_file: !ENV ${COMIN}/${RUN}.${cycle}.atmf000.nc
 sfc_file: !ENV ${COMIN}/${RUN}.${cycle}.sfcf000.nc
 trigger_file: !ENV ${COMIN}/${CDUMP}.t${cyc}z.logf000.txt
 
 igen: gfs_avn
-flat_file: !ENV ${PARMpost}/postxconfig-NT-GFS-F00.txt
-ctrl_file: !ENV ${PARMpost}/postcntrl_gfs_f00.xml
+flat_file: !ENV ${PARMpost}/postxconfig-NT-GFS-FLUX-F00.txt
 grib2_table: !ENV ${g2tmpl_ROOT}/share/params_grib2_tbl_new
 
 dbn_signals:
-  GFS_SA: !ENV ${COMIN}/${RUN}.${cycle}.atmf000.nc
-  GFS_MSC_sfcanal: !ENV ${COMIN}/${RUN}.${cycle}.sfcf000.nc
+  GFS_SGB_GB2: $(include[0].grib_out)
+  GFS_SGB_GB2_WIDX: $(include[0].grib_idx_out)

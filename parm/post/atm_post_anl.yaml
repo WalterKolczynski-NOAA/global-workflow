@@ -7,7 +7,6 @@ trigger_file: !ENV ${COMIN}/${RUN}.${cycle}.atmanl.nc
 
 igen: anal_gfs
 flat_file: !ENV ${PARMpost}/postxconfig-NT-GFS-ANL.txt
-ctrl_file: !ENV ${PARMpost}/postcntrl_gfs_anl.xml
 grib2_table: !ENV ${g2tmpl_ROOT}/share/params_grib2_tbl_new
 
 dbn_signals:

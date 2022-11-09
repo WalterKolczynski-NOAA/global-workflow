@@ -1,9 +1,9 @@
-work_dir: !ENV ${DATA}/atm
+work_dir: !ENV ${DATA}/sflux
 tmpl_file: !ENV ${PARMpost}/post.nml.j2
 mp_file: !ENV ${PARMpost}/nam_micro_lookup.dat
-grib_out: !ENV ${COMOUT}/${RUN}.${cycle}.master.grb2f${fhr}
-grib_idx_out: !ENV ${COMOUT}/${RUN}.${cycle}.master.grb2if${fhr}
-exe_log_file: !ENV ${DATA}/${pgmout}
+grib_out: !ENV ${COMOUT}/${RUN}.${cycle}.sfluxgrbf${fhr}.grb2
+grib_idx_out: !ENV ${COMOUT}/${RUN}.${cycle}.sfluxgrbf${fhr}.grb2.idx
+exe_log_file: !ENV ${pgmout}
 out_form: 'netcdfpara'
 cdate: !ENV ${CDATE}
 fhr: !ENV ${fhr}

@@ -1,0 +1,14 @@
+include:
+  - !INC ${PARMpost}/sflux_post.yaml
+
+atm_file: !ENV ${COMIN}/${RUN}.${cycle}.atmf${fhr}.nc
+sfc_file: !ENV ${COMIN}/${RUN}.${cycle}.sfcf${fhr}.nc
+trigger_file: !ENV ${COMIN}/${CDUMP}.t${cyc}z.logf${fhr}.txt
+
+igen: gfs_avn
+flat_file: !ENV ${PARMpost}/postxconfig-NT-GFS-FLUX.txt
+grib2_table: !ENV ${g2tmpl_ROOT}/share/params_grib2_tbl_new
+
+dbn_signals:
+  GFS_SGB_GB2: !ENV ${COMOUT}/${RUN}.${cycle}.sfluxgrbf${fhr}.grb2
+  GFS_SGB_GB2_WIDX: !ENV ${COMOUT}/${RUN}.${cycle}.sfluxgrbf${fhr}.grb2.idx

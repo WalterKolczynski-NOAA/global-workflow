@@ -2,14 +2,13 @@
 
 import os
 import shutil
-import glob
 import subprocess
 import time
 from datetime import timedelta
 from argparse import ArgumentParser
 from python.pygw.src.pygw import timetools
 from python.pygw.src.pygw.template import Template, TemplateConstants
-from python.pygw.src.pygw.fsutils import mkdir, chdir, rm_p
+from python.pygw.src.pygw.fsutils import mkdir
 from python.pygw.src.pygw.yaml_file import YAMLFile
 from pprint import pprint
 from functools import partial
@@ -61,7 +60,7 @@ def run_post(settings: dict) -> None:
                 '''
               )
     os.environ['PGBOUT'] = 'pgbfile'
-    subprocess.run(f"{settings['mpi_run']} upp.x > {settings['exe_log_file']}", shell=True, check=True)
+    subprocess.run(f"{settings['mpi_run']} upp.x >> {settings['exe_log_file']}", shell=True, check=True)
     subprocess.run(f"{settings['grib_idx_exe']} pgbfile pgifile >> {settings['exe_log_file']}",
                    shell=True, check=True)
 
@@ -171,21 +170,21 @@ def stage_post(settings: dict, nml_filename: str = 'itag') -> None:
                        work_dir   : str
                                     The temporary working directory to use
                        atm_file   : str
-                                    Raw atmosphere model output in NetCDF format. Will be copied
+                                    Raw atmosphere model output in NetCDF format. Will be linked
                                     to work_dir as atm_file.
                        sfc_file   : str
-                                    Raw atmosphere flux output in NetCDF format. Will be copied
+                                    Raw atmosphere flux output in NetCDF format. Will be linked
                                     to work_dir as sfc_file.
                        flat_file  : str
-                                    Post 'flat' file. Will be copied to work_dir as
+                                    Post 'flat' file. Will be linked to work_dir as
                                     postxconfig-NT.txt.
                        grib_table : str
-                                    Grib2 table. Will be copied to work_dir.
+                                    Grib2 table. Will be linked to work_dir.
                        mp_file    : str
-                                    Microphysics .dat file. Will be copied to work_dir as
+                                    Microphysics .dat file. Will be linked to work_dir as
                                     eta_micro_lookup.dat.
                        post_exe   : str
-                                    Path to the post executable. Will be copied to work_dir as
+                                    Path to the post executable. Will be linked to work_dir as
                                     upp.x
 
                    Additionally, the following key/value pair may be defined:
@@ -199,18 +198,18 @@ def stage_post(settings: dict, nml_filename: str = 'itag') -> None:
     '''
     work_dir = settings['work_dir']
     mkdir(work_dir)
-    chdir(work_dir)
+    os.chdir(work_dir)
 
     namelist = make_namelist(settings)
     with open(nml_filename, 'w') as file:
         file.write(namelist)
 
-    shutil.copy(settings['flat_file'], 'postxconfig-NT.txt')
-    shutil.copy(settings['grib_table'], './')
-    shutil.copy(settings['mp_file'], 'eta_micro_lookup.dat')
-    shutil.copy(settings['atm_file'], 'atm_file')
-    shutil.copy(settings['sfc_file'], 'sfc_file')
-    shutil.copy(settings['post_exe'], 'upp.x')
+    os.symlink(settings['flat_file'], 'postxconfig-NT.txt')
+    os.symlink(settings['grib_table'], os.path.basename(settings['grib_table']))
+    os.symlink(settings['mp_file'], 'eta_micro_lookup.dat')
+    os.symlink(settings['atm_file'], 'atm_file')
+    os.symlink(settings['sfc_file'], 'sfc_file')
+    os.symlink(settings['post_exe'], 'upp.x')
 
     if settings.get('is_ens', False):
         # TODO replace negatively_post_fcst with ${ens_pert_type} in postxconfig-NT.txt
@@ -293,6 +292,7 @@ if __name__ == '__main__':
     stage_post(settings=settings)
     wait_for_model_output(settings=settings)
     run_post(settings=settings)
+
     if settings['send_com'] in ["YES"]:
         send_com(settings)
 

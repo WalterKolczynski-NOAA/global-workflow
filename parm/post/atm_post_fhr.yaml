@@ -7,5 +7,4 @@ trigger_file: !ENV ${COMIN}/${CDUMP}.t${cyc}z.logf${fhr}.txt
 
 igen: gfs_avn
 flat_file: !ENV ${PARMpost}/postxconfig-NT-GFS.txt
-ctrl_file: !ENV ${PARMpost}/postcntrl_gfs.xml
 grib2_table: !ENV ${g2tmpl_ROOT}/share/params_grib2_tbl_new
