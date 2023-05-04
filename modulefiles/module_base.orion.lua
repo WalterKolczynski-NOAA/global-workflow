@@ -33,7 +33,7 @@ load(pathJoin("wgrib2", "2.0.8"))
 load(pathJoin("met", "10.1.2"))
 load(pathJoin("metplus", "4.1.3"))
 
-prepend_path("MODULEPATH", pathJoin("/work/noaa/global/glopara/git/prepobs/v1.0.1/modulefiles"))
+prepend_path("MODULEPATH", pathJoin("/work/noaa/global/glopara/git/prepobs/feature-GFSv17_com_reorg/modulefiles"))
 load(pathJoin("prepobs", "1.0.1"))
 
 prepend_path("MODULEPATH", pathJoin("/work/noaa/global/glopara/git/Fit2Obs/v1.0.0/modulefiles"))
