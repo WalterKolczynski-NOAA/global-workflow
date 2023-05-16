@@ -236,7 +236,7 @@ else   ## not_anl if_stime
   ############################################################
 
   for fhr in ${post_times}; do
-    echo "Start processing fhr=${post_times}"
+    echo "Start processing fhr=${fhr}"
     ###############################
     # Start Looping for the 
     # existence of the restart files
