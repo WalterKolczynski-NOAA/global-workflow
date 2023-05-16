@@ -15,12 +15,11 @@ echo "BEGIN: config.post"
 export NPOSTGRP=42
 
 # Post driver job that calls gfs_post.sh and downstream jobs
-export POSTJJOBSH="$HOMEpost/jobs/JGLOBAL_POST"
+export POSTJJOBSH="${HOMEpost}/jobs/JGLOBAL_POST"
 export GOESF=NO                              # goes image
 
-export npe_postgp=$npe_post
+export npe_postgp=${npe_post}
 export nth_postgp=1
-
 
 export SENDCOM="YES"
 

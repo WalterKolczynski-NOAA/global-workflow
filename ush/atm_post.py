@@ -255,7 +255,7 @@ def send_dbn(settings: dict) -> None:
                              The command to send a DBN alert
                dbn_signals : dict
                              Sub-dictionary with a list of signals (keys) and the files they are
-                             signalling (values)
+                             signaling (values)
 
     '''
     for signal in settings.get('dbn_signals', []):
