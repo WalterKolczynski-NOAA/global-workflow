@@ -171,7 +171,6 @@ fi
 if [[ ${checkout_gsi} == "YES" || ${checkout_gdas} == "YES" ]]; then
   checkout "gsi_utils.fd"    "https://github.com/KateFriedman-NOAA/GSI-Utils.git"   "feature/epic-stack"; errs=$((errs + $?))
   checkout "gsi_monitor.fd"  "https://github.com/KateFriedman-NOAA/GSI-Monitor.git" "feature/epic-stack"; errs=$((errs + $?))
-  checkout "gldas.fd"        "https://github.com/NOAA-EMC/GLDAS.git"       "fd8ba62"; errs=$((errs + $?))
 fi
 
 if [[ ${checkout_wafs} == "YES" ]]; then
