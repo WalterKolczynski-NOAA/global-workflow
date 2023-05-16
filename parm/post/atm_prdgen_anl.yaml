@@ -1,0 +1,28 @@
+include:
+  - !INC ${PARMpost}/atm_prdgen.yaml
+
+output:
+  0p25:
+    filters:
+      a:
+        parmlist: !ENV ${PARMpost}/global_1x1_paramlist_g2.anl
+        outfile: !ENV ${COMOUT}/${RUN}.${cycle}.pgrb2.0p25.anl
+      b:
+        parmlist: !ENV ${PARMpost}/global_master-catchup_parmlist_g2
+        outfile: !ENV ${COMOUT}/${RUN}.${cycle}.pgrb2b.0p25.anl
+  0p50:
+    filters:
+      a:
+        parmlist: !ENV ${PARMpost}/global_1x1_paramlist_g2.anl
+        outfile: !ENV ${COMOUT}/${RUN}.${cycle}.pgrb2.0p50.anl
+      b:
+        parmlist: !ENV ${PARMpost}/global_master-catchup_parmlist_g2
+        outfile: !ENV ${COMOUT}/${RUN}.${cycle}.pgrb2b.0p50.anl
+  1p00:
+    filters:
+      a:
+        parmlist: !ENV ${PARMpost}/global_1x1_paramlist_g2.anl
+        outfile: !ENV ${COMOUT}/${RUN}.${cycle}.pgrb2.1p00.anl
+      b:
+        parmlist: !ENV ${PARMpost}/global_master-catchup_parmlist_g2
+        outfile: !ENV ${COMOUT}/${RUN}.${cycle}.pgrb2b.1p00.anl

@@ -1,0 +1,15 @@
+post: !INC ${PARMpost}/atm_post.yaml
+master: $(post.grib_out)
+wgrib2_exe: !ENV ${WGRIB2}
+send_com: !ENV ${SENDCOM}
+send_dbn: !ENV ${SENDDBN}
+dbn_alert: !ENV ${DBNROOT}/bin/dbn_alert
+output:
+  0p25:
+    grid: 'latlon 0:1440:0.25 90:721:-0.25'
+  0p50:
+    grid: 'latlon 0:720:0.5 90:361:-0.5'
+  1p00:
+    grid: 'latlon 0:360:1.0 90:181:-1.0'
+  2p50:
+    grid: 'latlon 0:144:2.5 90:73:-2.5'

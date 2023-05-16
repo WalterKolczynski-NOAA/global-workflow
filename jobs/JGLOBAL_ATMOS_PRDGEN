@@ -1,0 +1,69 @@
+#! /usr/bin/env bash
+
+source "${HOMEgfs}/ush/preamble.sh"
+
+#############################
+# Source relevant config files
+#############################
+configs="base prdgen"
+export EXPDIR=${EXPDIR:-${HOMEgfs}/parm/config}
+config_path=${EXPDIR:-${PACKAGEROOT}/gfs.${gfs_ver}/parm/config}
+for config in ${configs}; do
+    source "${config_path}/config.${config}"
+    status=$?
+    (( status != 0 )) && exit "${status}"
+done
+
+
+##########################################
+# Source machine runtime environment
+##########################################
+. "${HOMEgfs}/env/${machine}.env" post
+status=$?
+(( status != 0 )) && exit "${status}"
+
+
+##############################################
+# Obtain unique process id (pid) and make temp directory
+##############################################
+export pid=${pid:-$$}
+export outid=${outid:-"LL${job}"}
+export DATA=${DATA:-${DATAROOT}/${jobid}}
+mkdir -p "${DATA}"
+cd "${DATA}" || exit 1
+
+
+##############################################
+# Run setpdy and initialize PDY variables
+##############################################
+export cycle="t${cyc}z"
+setpdy.sh
+source ./PDY
+
+
+##############################################
+# Determine Job Output Name on System
+##############################################
+export pgmout="OUTPUT.${pid}"
+export pgmerr=errfile
+
+####################################
+# Specify version numbers
+####################################
+export crtm_ver=${post_crtm_ver:-v2.2.6}
+export gfs_ver=${gfs_ver:-v15.0.0}
+export hwrf_ver=${hwrf_ver:-v11.0.5}
+export g2tmpl_ver=${g2tmpl_ver:-v1.5.0}
+
+
+export HOMECRTM=${HOMECRTM:-${PACKAGEROOT}/lib/crtm/${crtm_ver}}
+export FIXCRTM=${CRTM_FIX:-${HOMECRTM}/fix}
+
+if [ "${RUN}" = gdas ]; then
+  export FHOUT_PGB=${FHOUT:-1} #Output frequency of gfs pgb file at 1.0 and 0.5 deg.
+fi
+
+if [ "${RUN}" = gfs ];then
+  export FHOUT_PGB=${FHOUT_GFS:-3} #Output frequency of gfs pgb file at 1.0 and 0.5 deg.
+fi
+
