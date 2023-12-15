@@ -756,39 +756,38 @@ MOM6_postdet() {
 
     if [[ ! -d ${COM_OCEAN_HISTORY} ]]; then mkdir -p "${COM_OCEAN_HISTORY}"; fi
 
-    # Looping over FV3 output hours
-    # TODO: Need to define MOM6_OUTPUT_FH and control at some point for issue #1629
-    for fhr in ${FV3_OUTPUT_FH}; do
-      if [[ -z ${last_fhr:-} ]]; then
-        local last_fhr=${fhr}
-        continue
-      fi
-      (( interval = fhr - last_fhr ))
-      (( midpoint = last_fhr + interval/2 ))
+      # Looping over ocean output hours
+      for (( fhr = 0; fhr <= FHMAX; fhr += 6 )) do
+        if [[ -z ${last_fhr:-} ]]; then
+          local last_fhr=${fhr}
+          continue
+        fi
+        (( interval = fhr - last_fhr ))
+        (( midpoint = last_fhr + interval/2 ))
 
-      local vdate=$(date --utc -d "${current_cycle:0:8} ${current_cycle:8:2} + ${fhr} hours" +%Y%m%d%H)
-      local vdate_mid=$(date --utc -d "${current_cycle:0:8} ${current_cycle:8:2} + ${midpoint} hours" +%Y%m%d%H)
+        local vdate=$(date --utc -d "${current_cycle:0:8} ${current_cycle:8:2} + ${fhr} hours" +%Y%m%d%H)
+        local vdate_mid=$(date --utc -d "${current_cycle:0:8} ${current_cycle:8:2} + ${midpoint} hours" +%Y%m%d%H)
 
 
-      # Native model output uses window midpoint in the filename, but we are mapping that to the end of the period for COM
-      local source_file="ocn_${vdate_mid:0:4}_${vdate_mid:4:2}_${vdate_mid:6:2}_${vdate_mid:8:2}.nc"
-      local dest_file="ocn${vdate}.${ENSMEM}.${current_cycle}.nc"
-      ${NLN} "${COM_OCEAN_HISTORY}/${dest_file}" "${DATA}/${source_file}"
-
-      local source_file="ocn_daily_${vdate:0:4}_${vdate:4:2}_${vdate:6:2}.nc"
-      local dest_file=${source_file}
-      if [[ ! -a "${DATA}/${source_file}" ]]; then
+        # Native model output uses window midpoint in the filename, but we are mapping that to the end of the period for COM
+        local source_file="ocn_${vdate_mid:0:4}_${vdate_mid:4:2}_${vdate_mid:6:2}_${vdate_mid:8:2}.nc"
+        local dest_file="ocn${vdate}.${ENSMEM}.${current_cycle}.nc"
         ${NLN} "${COM_OCEAN_HISTORY}/${dest_file}" "${DATA}/${source_file}"
-      fi
 
-      local last_fhr=${fhr}
-    done
+        local source_file="ocn_daily_${vdate:0:4}_${vdate:4:2}_${vdate:6:2}.nc"
+        local dest_file=${source_file}
+        if [[ ! -a "${DATA}/${source_file}" ]]; then
+          ${NLN} "${COM_OCEAN_HISTORY}/${dest_file}" "${DATA}/${source_file}"
+        fi
+
+        local last_fhr=${fhr}
+      done
 
   elif [[ "${RUN}" =~ "gdas" ]]; then
     # Link output files for RUN = gdas
 
     # Save MOM6 backgrounds
-    for fhr in ${FV3_OUTPUT_FH}; do
+    for (( fhr = 0; fhr <= FHMAX; fhr += 6 )) do
       local idatestr=$(date --utc -d "${current_cycle:0:8} ${current_cycle:8:2} + ${fhr} hours" +%Y_%m_%d_%H)
       local fhr3=$(printf %03i "${fhr}")
       ${NLN} "${COM_OCEAN_HISTORY}/${RUN}.t${cyc}z.ocnf${fhr3}.nc" "${DATA}/ocn_da_${idatestr}.nc"

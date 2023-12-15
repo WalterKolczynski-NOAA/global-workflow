@@ -21,20 +21,41 @@ FIELD_TABLE=${FIELD_TABLE:-${HOMEgfs}/parm/ufs/fv3/field_table}
 dnats=${dnats:-0}
 
 # build the diag_table
-{
-echo "UFS_Weather_Model_Forecast"
+export INIT
+
+local init_time
 if [[ "${DOIAU}" = "YES" ]]; then
-  echo "${previous_cycle:0:4} ${previous_cycle:4:2} ${previous_cycle:6:2} ${previous_cycle:8:2} 0 0"
+  init_time=${previous_cycle}
 else
-  echo "${current_cycle:0:4} ${current_cycle:4:2} ${current_cycle:6:2} ${current_cycle:8:2} 0 0"
+  init_time=${current_cycle}
 fi
+
+{
 cat "${DIAG_TABLE}"
 if [[ -n "${AERO_DIAG_TABLE:-}" ]]; then
   cat "${AERO_DIAG_TABLE}"
 fi
 cat "${DIAG_TABLE_APPEND}"
-} >> diag_table
+} >> diag_table_tmpl
 
+# Disable variable not used warnings
+# shellcheck disable=SC2034
+{
+local init_year=${init_time:0:4}
+local init_mon=${init_time:4:2}
+local init_day=${init_time:6:2}
+local init_hour=${init_time:8:2}
+local init_min=0
+local init_sec=0
+
+local fh_out_ocn=${FH_OUT_OCN:-6}
+}
+source "${HOMEgfs}/ush/atparse.bash"
+atparse < "diag_table_tmpl" >> "diag_table"
+rm -f diag_table_tmpl
+
+echo "Rendered diag_table:"
+cat diag_table
 
 # copy data table
 ${NCP} "${DATA_TABLE}" data_table
