@@ -110,7 +110,7 @@ done
 ##############################################################
 cd "${COM_ATMOS_BUFR}" || exit 2
 tar -cf - . | /usr/bin/gzip > "${RUN}.${cycle}.bufrsnd.tar.gz"
-cd "${DATA}" || exit
+cd "${DATA}" || exit 2
 
 ########################################
 # Send the single tar file to OSO
