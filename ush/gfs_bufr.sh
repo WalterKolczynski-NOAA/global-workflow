@@ -129,8 +129,7 @@ if [[ "${err}" -ne 0 ]]; then
 else
 
   # Count the number of restart files
-  nrestarts=0
-  nrestarts=$(find ./ -maxdepth 1 -type f -name 'fort.*' | wc -l || true)
+  nrestarts=$(find ./ -maxdepth 1 -type f -name 'fort.*' | wc -l || 0)
   echo "Number of restart fort.* files found: ${nrestarts}"
 
   # Check if there are restart files
