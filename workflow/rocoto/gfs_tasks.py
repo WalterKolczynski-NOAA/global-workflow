@@ -10,7 +10,6 @@ class GFSTasks(Tasks):
     def __init__(self, app_config: AppConfig, cdump: str) -> None:
         super().__init__(app_config, cdump)
 
-
     @staticmethod
     def _is_this_a_gdas_task(cdump, task_name):
         if cdump != 'enkfgdas':
