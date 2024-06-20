@@ -40,7 +40,8 @@ class GFSForecastOnlyAppConfig(AppConfig):
                 configs += ['metp']
 
             if self.do_bufrsnd:
-                configs += ['postsnd']
+                configs += ['bufr_sounding']
+                configs += ['bufr_sounding_collect']
 
             if self.do_gempak:
                 configs += ['gempak']
@@ -120,7 +121,8 @@ class GFSForecastOnlyAppConfig(AppConfig):
                 tasks += ['metp']
 
             if self.do_bufrsnd:
-                tasks += ['postsnd']
+                tasks += ['bufr_sounding']
+                tasks += ['bufr_sounding_collect']
 
             if self.do_gempak:
                 tasks += ['gempak', 'gempakmeta', 'gempakncdcupapgif', 'gempakpgrb2spec']

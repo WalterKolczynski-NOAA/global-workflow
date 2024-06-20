@@ -10,6 +10,7 @@ class GFSTasks(Tasks):
     def __init__(self, app_config: AppConfig, cdump: str) -> None:
         super().__init__(app_config, cdump)
 
+
     @staticmethod
     def _is_this_a_gdas_task(cdump, task_name):
         if cdump != 'enkfgdas':
@@ -1304,28 +1305,73 @@ class GFSTasks(Tasks):
 
         return task
 
-    def postsnd(self):
+    def bufr_sounding(self):
+        atm_hist_path = self._template_to_rocoto_cycstring(self._base["COM_ATMOS_HISTORY_TMPL"])
         deps = []
-        dep_dict = {'type': 'task', 'name': f'{self.cdump}fcst'}
+        data = f'{atm_hist_path}/{self.cdump}.t@Hz.atm.logf#fhr#.txt'
+        dep_dict = {'type': 'data', 'data': data}
         deps.append(rocoto.add_dependency(dep_dict))
-        dependencies = rocoto.create_dependency(dep=deps)
+        dependencies = rocoto.create_dependency(dep=deps)        
 
-        resources = self.get_resource('postsnd')
-        task_name = f'{self.cdump}postsnd'
+        resources = self.get_resource('bufr_sounding')
+
+        postenvars = self.envars.copy()
+        postenvar_dict = {'FHR3': '#fhr#'}
+        for key, value in postenvar_dict.items():
+            postenvars.append(rocoto.create_envar(name=key, value=str(value)))
+
+        task_name = f'{self.cdump}bufr_sounding_f#fhr#'
         task_dict = {'task_name': task_name,
                      'resources': resources,
                      'dependency': dependencies,
-                     'envars': self.envars,
+                     'envars': postenvars,
                      'cycledef': self.cdump.replace('enkf', ''),
-                     'command': f'{self.HOMEgfs}/jobs/rocoto/postsnd.sh',
+                     'command': f'{self.HOMEgfs}/jobs/rocoto/bufr_sounding.sh',
                      'job_name': f'{self.pslot}_{task_name}_@H',
                      'log': f'{self.rotdir}/logs/@Y@m@d@H/{task_name}.log',
-                     'maxtries': '&MAXTRIES;'
-                     }
+                     'maxtries': '&MAXTRIES;'}
+
+        # Override forecast lengths locally to be that of sounding job
+        local_config = self._configs['bufr_sounding']
+        sounding_times = {
+            'FHMAX_GFS': local_config['ENDHOUR']
+        }
+        local_config.update(sounding_times)
+
+
+        fhrs = self._get_forecast_hours('gfs', local_config)
+        fhr_var_dict = {'fhr': ' '.join([f"{fhr:03d}" for fhr in fhrs])}
+
+        fhr_metatask_dict = {'task_name': f'{self.cdump}bufr_sounding',
+                             'task_dict': task_dict,
+                             'var_dict': fhr_var_dict}
+
+        task = rocoto.create_task(fhr_metatask_dict)
+
+        return task
+
+    def bufr_sounding_collect(self):
+        deps = []
+        dep_dict = {'type': 'metatask', 'name': f'{self.cdump}bufr_sounding'}
+        deps.append(rocoto.add_dependency(dep_dict))
+        dependencies = rocoto.create_dependency(dep=deps)
+
+        resources = self.get_resource('bufr_sounding_collect')
+        task_name = f'{self.cdump}bufr_sounding_collect'
+        task_dict = {'task_name': f'{task_name}',
+             'resources': resources,
+             'dependency': dependencies,
+             'envars': self.envars,
+             'cycledef': self.cdump.replace('enkf', ''),
+             'command': f'{self.HOMEgfs}/jobs/rocoto/bufr_sounding_collect.sh',
+             'job_name': f'{self.pslot}_{task_name}',
+             'log': f'{self.rotdir}/logs/@Y@m@d@H/{task_name}.log',
+             'maxtries': '&MAXTRIES;'}
 
         task = rocoto.create_task(task_dict)
 
         return task
+
 
     def fbwind(self):
 
@@ -2171,6 +2217,9 @@ class GFSTasks(Tasks):
         # Post job dependencies
         dep_dict = {'type': 'metatask', 'name': f'{self.cdump}atmos_prod'}
         deps.append(rocoto.add_dependency(dep_dict))
+        if self.app_config.do_bufrsnd:
+            dep_dict = {'type': 'task', 'name': f'{self.cdump}bufr_sounding_collect'}
+            deps.append(rocoto.add_dependency(dep_dict))
         if self.app_config.do_wave:
             dep_dict = {'type': 'task', 'name': f'{self.cdump}wavepostsbs'}
             deps.append(rocoto.add_dependency(dep_dict))

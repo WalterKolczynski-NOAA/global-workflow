@@ -92,7 +92,8 @@ class GFSCycledAppConfig(AppConfig):
                 configs += ['npoess']
 
         if self.do_bufrsnd:
-            configs += ['postsnd']
+            configs += ['bufr_sounding']
+            configs += ['bufr_sounding_collect']
 
         if self.do_awips:
             configs += ['awips']
@@ -262,7 +263,8 @@ class GFSCycledAppConfig(AppConfig):
                 gfs_tasks += ['waveawipsbulls', 'waveawipsgridded']
 
         if self.do_bufrsnd:
-            gfs_tasks += ['postsnd']
+            gfs_tasks += ['bufr_sounding']
+            gfs_tasks += ['bufr_sounding_collect']
 
         if self.do_gempak:
             gfs_tasks += ['gempak']

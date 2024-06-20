@@ -1,0 +1,16 @@
+#! /usr/bin/env bash
+
+########## config.bufr_sounding_collect ##########
+# GFS bufr sounding step specific
+
+echo "BEGIN: config.bufr_sounding_collect"
+
+# Get task specific resources
+source "${EXPDIR}/config.resources" bufr_sounding_collect
+
+export ENDHOUR=180
+if (( FHMAX_GFS < ENDHOUR )) ; then
+	export ENDHOUR=${FHMAX_GFS}
+fi
+
+echo "END: config.bufr_sounding_collect"

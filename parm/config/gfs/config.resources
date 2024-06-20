@@ -1112,17 +1112,25 @@ case ${step} in
     export is_exclusive=True
     ;;
 
-  "postsnd")
-    export wtime_postsnd="02:00:00"
-    export npe_postsnd=40
-    export nth_postsnd=8
-    export npe_node_postsnd=10
-    export npe_postsndcfp=9
-    export npe_node_postsndcfp=1
-    postsnd_req_cores=$(( npe_node_postsnd * nth_postsnd ))
-    if (( postsnd_req_cores > npe_node_max )); then
-        export npe_node_postsnd=$(( npe_node_max / nth_postsnd ))
+  "bufr_sounding")
+    export wtime_bufr_sounding="00:15:00"
+    export npe_bufr_sounding=40
+    export nth_bufr_sounding=8
+    export npe_node_bufr_sounding=10
+    export npe_bufr_soundingcfp=9
+    export npe_node_bufr_soundingcfp=1
+    bufr_sounding_req_cores=$(( npe_node_bufr_sounding * nth_bufr_sounding ))
+    if (( bufr_sounding_req_cores > npe_node_max )); then
+        export npe_node_bufr_sounding=$(( npe_node_max / nth_bufr_sounding ))
     fi
+    export is_exclusive=True
+    ;;
+
+  "bufr_sounding_collect")
+    export wtime_bufr_sounding_collect="00:15:00"
+    export npe_bufr_sounding_collect=1
+    export nth_bufr_sounding_collect=1
+    export npe_node_bufr_sounding_collect=1
     export is_exclusive=True
     ;;
 
