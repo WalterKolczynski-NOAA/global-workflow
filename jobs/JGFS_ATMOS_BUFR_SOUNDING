@@ -3,11 +3,14 @@
 source "${HOMEgfs}/ush/preamble.sh"
 source "${HOMEgfs}/ush/jjob_header.sh" -e "bufr_sounding" -c "base bufr_sounding"
 
+# Create directory to hold intermediate bufr files
+export DATAoutput="${DATAROOT}/bufr_${PDY}${cyc}"
+if [[ -d "${DATAoutput}" ]]; then mkdir -p "${DATAoutput}"; fi
 
 ##############################################
 # Set variables used in the exglobal script
 ##############################################
-export CDUMP=${RUN/enkf}
+export CDUMP=${RUN/enkf/}
 
 ########################################
 # Runs GFS BUFR SOUNDINGS
@@ -21,7 +24,7 @@ export DBNROOT=${DBNROOT:-${UTILROOT}/fakedbn}
 # Define COM Directories
 ##############################
 YMD=${PDY} HH=${cyc} declare_from_tmpl -rx COM_ATMOS_HISTORY COM_ATMOS_BUFR \
-  COM_ATMOS_WMO COM_ATMOS_GEMPAK
+    COM_ATMOS_WMO COM_ATMOS_GEMPAK
 
 [[ ! -d ${COM_ATMOS_BUFR} ]] && mkdir -p "${COM_ATMOS_BUFR}"
 [[ ! -d ${COM_ATMOS_GEMPAK} ]] && mkdir -p "${COM_ATMOS_GEMPAK}"
@@ -38,7 +41,6 @@ if [[ ! -d ${DATA_ATMOS_RESTART} ]]; then mkdir -p "${DATA_ATMOS_RESTART}"; fi
 status=$?
 [[ ${status} -ne 0 ]] && exit "${status}"
 
-
 ##############################################
 # End JOB SPECIFIC work
 ##############################################
@@ -46,8 +48,8 @@ status=$?
 ##############################################
 # Final processing
 ##############################################
-if [[ -e "${pgmout}" ]] ; then
-  cat "${pgmout}"
+if [[ -e "${pgmout}" ]]; then
+    cat "${pgmout}"
 fi
 
 ##########################################
@@ -56,6 +58,4 @@ fi
 cd "${DATAROOT}" || exit 0
 [[ ${KEEPDATA} = "NO" ]] && rm -rf "${DATA}"
 
-
 exit 0
-
