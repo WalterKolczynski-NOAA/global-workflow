@@ -1873,7 +1873,7 @@ class GFSTasks(Tasks):
 
     def jediinline(self):
         deps = []
-        dep_dict = {'type': 'task', 'name': f'{self.run}_stage_ic'}
+        dep_dict = {'type': 'task', 'name': f'gdas_stage_ic'}
         deps.append(rocoto.add_dependency(dep_dict))
         dependencies = rocoto.create_dependency(dep=deps)
 

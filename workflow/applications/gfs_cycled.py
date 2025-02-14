@@ -330,7 +330,8 @@ class GFSCycledAppConfig(AppConfig):
                 #task_names[run].append('jediinline') if 'gdas' in run else 0
                 task_names[run].append('epos') if 'gdas' in run else 0
 
-                task_names[run] += ['stage_ic', 'ecen', 'esfc']
+                #task_names[run] += ['stage_ic', 'ecen', 'esfc']
+                task_names[run] += ['ecen', 'esfc'] if options['do_jediinline'] else ['stage_ic', 'ecen', 'esfc']
                 if options['do_archtar']:
                     task_names[run] += ['earc_tars']
                 task_names[run] += ['earc_vrfy', 'cleanup']
