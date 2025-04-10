@@ -12,7 +12,10 @@ source "${USHgfs}/preamble.sh"
 #chmod 766 ${DATA}/gen-exp
 #cd ${DATA}/gen-exp
 #
-#rm -f Data/crtm/*
+##rm -f Data/crtm/*
+##cp -r ${JEDIIN}/2.3.0/* Data/crtm/
+#mv Data Data_broken_links
+#cp -Lr ${JEDIIN}/Data .
 #cp -r ${JEDIIN}/2.3.0/* Data/crtm/
 #cp -r ${JEDIIN}/AerosolCoeff.bin Data/crtm/AerosolCoeff.bin
 #
@@ -21,9 +24,12 @@ source "${USHgfs}/preamble.sh"
 #if [ ${err} -ne 0 ]; then exit 1; fi
 #
 #deactivate
-
+#
 srun --export=ALL -n 12 ${GDASsorc}/build/bin/fv3jedi_letkf.x testinput/letkf-c48-exp.yaml
 export err=$?;
 if [ ${err} -ne 0 ]; then exit 1; fi
 
+mkdir -p ${ROTDIR}/jediinline.20230323/12
+cp ${DATA}/gen-exp/ModelRunDirs/c48_001/RESTART/* ${ROTDIR}/jediinline.20230323/12/.
+cp ${DATA}/gen-exp/ModelRunDirs/c48_002/RESTART/* ${ROTDIR}/jediinline.20230323/12/.
 exit 0
