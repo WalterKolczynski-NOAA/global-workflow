@@ -28,6 +28,7 @@ class GFSCycledAppConfig(AppConfig):
         self.runs.append('enkfgdas') if 'gdas' in self.ens_runs else 0
         self.runs.append("gfs") if base['INTERVAL_GFS'] > 0 else 0
         self.runs.append('enkfgfs') if 'gfs' in self.ens_runs and "gfs" in self.runs else 0
+        self.runs = ["jediinline"]  # EPIC DAB: testing just a run=jedi
 
     def _get_run_options(self, conf: Configuration) -> Dict[str, Any]:
 
@@ -95,9 +96,6 @@ class GFSCycledAppConfig(AppConfig):
         if options['do_fit2obs']:
             configs += ['fit2obs']
 
-        if options['do_jediinline']:
-            configs += ['jediinline']
-
         if options['do_verfozn']:
             configs += ['verfozn']
 
@@ -154,6 +152,9 @@ class GFSCycledAppConfig(AppConfig):
                         'mos_stn_fcst', 'mos_grd_fcst', 'mos_ext_stn_fcst', 'mos_ext_grd_fcst',
                         'mos_stn_prdgen', 'mos_grd_prdgen', 'mos_ext_stn_prdgen', 'mos_ext_grd_prdgen',
                         'mos_wx_prdgen', 'mos_wx_ext_prdgen']
+
+        if options['do_jediinline']:
+            configs += ['jediinline']
 
         return configs
 
@@ -325,15 +326,13 @@ class GFSCycledAppConfig(AppConfig):
                     task_names[run] += ['ediag'] if options['lobsdiag_forenkf'] else ['eomg']
 
                 task_names[run].append('esnowanl') if options['do_jedisnowda'] else 0
-                #task_names[run].append('efcs') if 'gdas' in run else 0
-                task_names[run] += ['jediinline'] if options['do_jediinline'] else ['efcs']
-                #task_names[run].append('jediinline') if 'gdas' in run else 0
+                task_names[run].append('efcs') if 'gdas' in run else 0
                 task_names[run].append('epos') if 'gdas' in run else 0
 
-                #task_names[run] += ['stage_ic', 'ecen', 'esfc']
-                task_names[run] += ['ecen', 'esfc'] if options['do_jediinline'] else ['stage_ic', 'ecen', 'esfc']
+                task_names[run] += ['stage_ic', 'ecen', 'esfc']
                 if options['do_archtar']:
                     task_names[run] += ['earc_tars']
                 task_names[run] += ['earc_vrfy', 'cleanup']
 
+            task_names[run] = ['jediinline'] if options['do_jediinline'] else 0
         return task_names

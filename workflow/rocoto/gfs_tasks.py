@@ -1872,17 +1872,17 @@ class GFSTasks(Tasks):
         return task
 
     def jediinline(self):
-        deps = []
-        dep_dict = {'type': 'task', 'name': f'gdas_stage_ic'}
-        deps.append(rocoto.add_dependency(dep_dict))
-        dependencies = rocoto.create_dependency(dep=deps)
+        #deps = []
+        #dep_dict = {'type': 'task', 'name': f'gdas_stage_ic'}
+        #deps.append(rocoto.add_dependency(dep_dict))
+        #dependencies = rocoto.create_dependency(dep=deps)
 
         resources = self.get_resource('jediinline')
-        cycledef = 'gdas_half,gdas' if self.run in ['enkfgdas'] else self.run.replace('enkf', '')
+        cycledef = 'gdas_half' if self.run in ['jediinline'] else self.run.replace('enkf', '')
         task_name = f'{self.run}_jediinline'
         task_dict = {'task_name': task_name,
                      'resources': resources,
-                     'dependency': dependencies,
+        #             'dependency': dependencies,
                      'envars': self.envars,
                      'cycledef': cycledef,
                      'command': f'{self.HOMEgfs}/jobs/rocoto/jediinline.sh',
