@@ -2936,7 +2936,6 @@ class GFSTasks(Tasks):
         deps = []
         dep_dict = {'type': 'metatask', 'name': f'{self.run.replace("enkf","")}_fcst'}
         dep_dict = {'type': 'task', 'name': f'{self.run}_fcst_mem001'}
-        dep_dict = {'type': 'task', 'name': f'{self.run}_jediinline'}
         deps.append(rocoto.add_dependency(dep_dict))
         dependencies = rocoto.create_dependency(dep_condition='and', dep=deps)
 
