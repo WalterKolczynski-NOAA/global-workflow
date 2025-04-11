@@ -40,6 +40,9 @@ case ${RUN} in
     export FHMAX_HF=0
     export FHOUT_HF=0
     ;;
+  jedi*)
+    echo "RUN=jedi"
+    ;;
   *)
     echo "FATAL ERROR: Unsupported RUN '${RUN}'"
     exit 1
