@@ -7,7 +7,8 @@ export DATAjob="${DATAROOT}/${RUN}jediinline.${PDY:-}${cyc}"
 export DATA="${DATAjob}/${jobid}"
 source "${HOMEgfs}/ush/jjob_header.sh" -e "jediinline" -c "base jediinline"
 
-export GDASsorc=/scratch1/NCEPDEV/nems/David.Burrows/feb4_mark_updates/gw_jedi_soca_uwtools_update/sorc/gdas.cd
+#export GDASsorc=/scratch1/NCEPDEV/nems/David.Burrows/feb4_mark_updates/gw_jedi_soca_uwtools_update/sorc/gdas.cd
+export GDASsorc=${HOMEgfs}/sorc/gdas.cd
 export JEDIIN=/scratch1/NCEPDEV/nems/David.Burrows/jedi_input
 
 unset PYTHONPATH

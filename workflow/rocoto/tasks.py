@@ -17,7 +17,7 @@ class Tasks:
                    'prepatmiodaobs', 'atmanlinit', 'atmanlvar', 'atmanlfv3inc', 'atmanlfinal',
                    'prepoceanobs',
                    'marineanlinit', 'marineanlletkf', 'marinebmat', 'marineanlvar', 'ocnanalecen', 'marineanlchkpt', 'marineanlfinal', 'ocnanalvrfy',
-                   'earc_vrfy', 'earc_tars', 'ecen', 'echgres', 'ediag', 'efcs', 
+                   'earc_vrfy', 'earc_tars', 'ecen', 'echgres', 'ediag', 'efcs',
                    'eobs', 'eomg', 'epos', 'esfc', 'eupd',
                    'atmensanlinit', 'atmensanlobs', 'atmensanlsol', 'atmensanlletkf', 'atmensanlfv3inc', 'atmensanlfinal',
                    'aeroanlinit', 'aeroanlvar', 'aeroanlfinal', 'aeroanlgenb',
