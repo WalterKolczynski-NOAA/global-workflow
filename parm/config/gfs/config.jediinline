@@ -6,6 +6,21 @@
 echo "BEGIN: config.jediinline"
 
 #source "${EXPDIR}/config.ufs" ${string}
+IFS=', ' read -ra segments <<< "${FCST_SEGMENTS}"
+# Determine MIN and MAX based on the forecast segment
+export FHMIN=${segments[${FCST_SEGMENT}]}
+export FHMAX=${segments[${FCST_SEGMENT}+1]}
+# Cap other FH variables at FHMAX for the segment
+export FHMIN_WAV=$(( FHMIN > FHMIN_WAV ? FHMIN : FHMIN_WAV ))
+export FHMAX_HF=$(( FHMAX_HF_GFS > FHMAX ? FHMAX : FHMAX_HF_GFS ))
+export FHMAX_WAV=$(( FHMAX_WAV > FHMAX ? FHMAX : FHMAX_WAV ))
+# shellcheck disable=SC2153
+export FHOUT=${FHOUT_GFS}
+export FHOUT_HF=${FHOUT_HF_GFS}
+export FHOUT_OCN=${FHOUT_OCN_GFS}
+export FHOUT_ICE=${FHOUT_ICE_GFS}
+export FHMAX_HF=0
+export FHOUT_HF=0
 
 # Get task specific resources
 source "${EXPDIR}/config.resources" jediinline
