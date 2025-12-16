@@ -76,7 +76,7 @@ case "${machine}" in
 "hercules") FIX_DIR="/work2/noaa/global/role-global/fix" ;;
 "gaeac5") FIX_DIR="/gpfs/f5/ufs-ard/world-shared/global/glopara/data/fix" ;;
 "gaeac6") FIX_DIR="/gpfs/f6/drsa-precip3/world-shared/role.glopara/fix" ;;
-"noaacloud") FIX_DIR="/contrib/global-workflow-shared-data/fix" ;;
+"noaacloud") FIX_DIR="/lustre/fix" ;;
 *)
   echo "FATAL: Unknown target machine ${machine}, couldn't set FIX_DIR"
   exit 1
@@ -150,11 +150,19 @@ ${LINK_OR_COPY} "${HOMEgfs}/sorc/ufs_model.fd/tests/parm/noahmptable.tbl" .
 cd "${HOMEgfs}/parm/post" || exit 1
 ${LINK_OR_COPY} "${HOMEgfs}/sorc/upp.fd/parm/params_grib2_tbl_new" .
 ${LINK_OR_COPY} "${HOMEgfs}/sorc/upp.fd/fix/nam_micro_lookup.dat" .
-for dir in gfs gefs sfs
+for dir in gfs gcafs gefs sfs
 do
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/upp.fd/parm/${dir}" .
 done
-for file in ice_gfs.csv ice_gefs.csv ocean_gfs.csv ocean_gefs.csv ocnicepost.nml.jinja2; do
+
+for file in optics_luts_DUST.dat optics_luts_DUST_nasa.dat optics_luts_NITR_nasa.dat \
+    optics_luts_SALT.dat optics_luts_SALT_nasa.dat optics_luts_SOOT.dat optics_luts_SOOT_nasa.dat \
+    optics_luts_SUSO.dat optics_luts_SUSO_nasa.dat optics_luts_WASO.dat optics_luts_WASO_nasa.dat
+do
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/upp.fd/fix/chem/${file}" .
+done
+
+  for file in ice_gfs.csv ice_gefs.csv ocean_gfs.csv ocean_gefs.csv ocnicepost.nml.jinja2; do
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gfs_utils.fd/parm/ocnicepost/${file}" .
 done
 
@@ -181,6 +189,7 @@ declare -a ufs_templates=("model_configure.IN" "input_global_nest.nml.IN"
   "ufs.configure.leapfrog_atm_wav.IN"
   "ww3_shel.nml.IN"
   "post_itag_gfs"
+  "post_itag_gcafs"
   "global_control.nml.IN")
 for file in "${ufs_templates[@]}"; do
   if [[ -s "${file}" ]]; then
@@ -260,19 +269,13 @@ if [[ -d "${HOMEgfs}/sorc/gdas.cd/build" ]]; then
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ufsda" .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/gen_bufr2ioda_json.py"    .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/gen_bufr2ioda_yaml.py"    .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/run_bufr2ioda.py"         .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/sorc/da-utils/ush/gsincdiag_to_ioda" .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/sorc/da-utils/ush/pyiodaconv"        .
   cd "${HOMEgfs}/ush" || exit 1
-  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/run_bufr2ioda.py"    .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/gsi_satbias2ioda_all.sh"            .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/snow/bufr_snocvr_snomad.py"         .
   ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/build/bin/imsfv3_scf2ioda.py"           .
-  declare -a gdasapp_ocn_insitu_profile_platforms=("argo" "bathy" "glider" "marinemammal" "tesac" "xbtctd")
-  for platform in "${gdasapp_ocn_insitu_profile_platforms[@]}"; do
-    ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/marine/bufr2ioda_insitu_profile_${platform}.py" .
-  done
-  declare -a gdasapp_ocn_insitu_sfc_platforms=("altkob" "trkob")
-  for platform in "${gdasapp_ocn_insitu_sfc_platforms[@]}"; do
-    ${LINK_OR_COPY} "${HOMEgfs}/sorc/gdas.cd/ush/ioda/bufr2ioda/marine/bufr2ioda_insitu_surface_${platform}.py" .
-  done
 fi
 
 #------------------------------
@@ -321,6 +324,23 @@ if [[ -d "${HOMEgfs}/sorc/gsi_enkf.fd/fix/build_gsinfo" ]]; then
   done
 fi
 
+
+#------------------------------
+#--add NEXUS files
+#------------------------------
+if [[ -d "${HOMEgfs}/sorc/nexus.fd" ]]; then
+  cd "${HOMEgfs}/parm/chem" || exit 1
+  if [[ -d nexus ]]; then
+      rm -rf nexus
+  fi
+  mkdir -p nexus/gocart
+  cd nexus/gocart || exit 1
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/nexus.fd/config/gocart/NEXUS_Config.rc.j2" .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/nexus.fd/config/gocart/HEMCO_sa_Grid.rc.j2" .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/nexus.fd/config/gocart/HEMCO_sa_Time.rc.j2" .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/nexus.fd/config/gocart/HEMCO_sa_Diag.rc.j2" .
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/nexus.fd/config/gocart/HEMCO_sa_Spec.rc.j2" .
+fi
 
 #------------------------------
 #--link executables
@@ -420,7 +440,6 @@ fi
 # GDASApp executables
 if [[ -d "${HOMEgfs}/sorc/gdas.cd/install" ]]; then
   cp -f "${HOMEgfs}/sorc/gdas.cd/install/bin"/gdas*           ./
-  # cp -f "${HOMEgfs}/sorc/gdas.cd/install/bin/bufr2ioda.x"     ./gdas_bufr2ioda.x
   cp -f  "${HOMEgfs}/sorc/gdas.cd/install/bin/calcfIMS.exe"   ./gdas_calcfIMS.x
   cp -f "${HOMEgfs}/sorc/gdas.cd/install/bin/apply_incr.exe"  ./gdas_apply_incr.x
 fi
@@ -430,6 +449,12 @@ if [[ -d "${HOMEgfs}/sorc/gdas.cd/install" ]]; then
   mkdir -p "${HOMEgfs}/lib" || exit 1
   cd "${HOMEgfs}/lib" || exit 1
   cp -af "${HOMEgfs}/sorc/gdas.cd/install/lib/." ./
+fi
+
+# NEXUS executable
+if [[ -d "${HOMEgfs}/sorc/nexus.fd/build/bin" ]]; then
+  cd "${HOMEgfs}/exec" || exit 1
+  ${LINK_OR_COPY} "${HOMEgfs}/sorc/nexus.fd/build/bin/nexus" nexus.x
 fi
 
 #------------------------------

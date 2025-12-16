@@ -72,7 +72,11 @@ class Archive(Task):
         archive_parm = os.path.join(arch_dict.PARMgfs, "archive")
 
         # Collect the dataset to archive locally
-        arcdir_j2yaml = os.path.join(archive_parm, f"{arch_dict.NET}_arcdir.yaml.j2")
+        # Select template based on RUN type: ensemble (enkf) or deterministic (NET)
+        if "enkf" in arch_dict.RUN:
+            arcdir_j2yaml = os.path.join(archive_parm, "enkf_arcdir.yaml.j2")
+        else:
+            arcdir_j2yaml = os.path.join(archive_parm, f"{arch_dict.NET}_arcdir.yaml.j2")
 
         # Add the glob.glob function for capturing log filenames
         arch_dict['glob'] = glob.glob
@@ -707,7 +711,7 @@ class Archive(Task):
         # Restart archiving for gdas RUN
         if run == "gdas":
             # TODO: Always archive gdas ocean restarts (for GEFSv13 when project restarts)
-            if tar_type == "gdasocean_restart" and arch_warm_ics:
+            if (tar_type == "gdasocean_restart") and arch_warm_ics:
                 return True
 
             # Archive warm atmosphere and ice increments if requested
