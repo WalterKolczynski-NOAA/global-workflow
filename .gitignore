@@ -175,7 +175,6 @@ ush/imsfv3_scf2ioda.py
 ush/bufr_snocvr_snomad.py
 ush/atparse.bash
 ush/bufr2ioda_insitu*
-ush/container
 ush/python/gsincdiag_to_ioda
 ush/python/ufsda
 ush/python/pyiodaconv
