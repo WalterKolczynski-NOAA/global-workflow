@@ -29,7 +29,7 @@ fi
 ###############################################################
 # Run archive script
 ###############################################################
-GLOBALARCHIVESH=${GLOBALARCHIVESH:-${SCRgfs}/exglobal_archive_vrf.py}
+GLOBALARCHIVESH=${GLOBALARCHIVESH:-${SCRgfs}/exglobal_archive_vrfy.py}
 "${PYCMD}" "${GLOBALARCHIVESH}" ${PYEXTRAARGS}
 err=$?
 if [[ ${err} -ne 0 ]]; then
