@@ -101,6 +101,10 @@ elif [[ ${MACHINE_ID} = "noaacloud" ]]; then
     # We are on NOAA Cloud
     module purge
 
+elif [[ ${MACHINE_ID} = container ]]; then
+    # We are in container
+    source /usr/lmod/lmod/init/bash
+
 else
     echo WARNING: UNKNOWN PLATFORM 1>&2
 fi

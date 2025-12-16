@@ -89,7 +89,7 @@ cat > "${exec_script}" << EOF_SCRIPT
  singularity exec \\
         ${bindings} \\
         ${container} \\
-        ${HOMEgfs}/jobs/${item}
+        ${HOMEgfs}/dev/jobs/${item}
 EOF_SCRIPT
 
   chmod +x "${exec_script}"
