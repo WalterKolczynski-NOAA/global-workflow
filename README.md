@@ -1,5 +1,6 @@
 [![Read The Docs Status](https://readthedocs.org/projects/global-workflow/badge/?badge=latest)](http://global-workflow.readthedocs.io/)
-[![shellnorms](https://github.com/NOAA-EMC/global-workflow/actions/workflows/linters.yaml/badge.svg)](https://github.com/NOAA-EMC/global-workflow/actions/workflows/linters.yaml)
+[![shfmt](https://github.com/NOAA-EMC/global-workflow/workflows/bash_code_analysis/shfmt/badge.svg?branch=develop&event=push)](https://github.com/NOAA-EMC/global-workflow/actions?query=workflow/bash_code_analysis+event%3Apush+branch%3Adevelop)
+[![shellcheck](https://github.com/NOAA-EMC/global-workflow/workflows/bash_code_analysis/shellcheck/badge.svg?branch=develop&event=push)](https://github.com/NOAA-EMC/global-workflow/actions?query=workflow/bash_code_analysis/shellcheck+event%3Apush+branch%3Adevelop)
 [![pynorms](https://github.com/NOAA-EMC/global-workflow/actions/workflows/pynorms.yaml/badge.svg)](https://github.com/NOAA-EMC/global-workflow/actions/workflows/pynorms.yaml)
 ![Custom badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/emcbot/e35aa2904a54deae6bbb1fdc2d960c71/raw/wcoss2.json)
 
