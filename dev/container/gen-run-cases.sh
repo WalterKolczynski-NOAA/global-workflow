@@ -21,7 +21,7 @@ HOMEDIR=${HOMEgfs}
 img=ubuntu22.04-intel-ufs-env-v1.9.2.img
 if [[ ${MACHINE_ID} = ursa* ]] ; then
    container=/scratch3/NCEPDEV/nems/role.epic/containers/${img}
-   rundir=/scratch3/NAGAPE/epic/${USER}/run
+   rundir=/scratch3/NAGAPE/epic/${USER}/run/container
    bindings="-B /scratch3 -B /scratch4"
    HPC_ACCOUNT=epic
 

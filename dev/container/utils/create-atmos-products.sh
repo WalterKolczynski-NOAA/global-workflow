@@ -49,7 +49,7 @@ cat > "${eap_script}" << EOF_ATMOS_PRODUCTS
         ${bindings} \\
         ${container} \\
         ${HOMEgfs}/dev/container/env/gfsutils-env.sh \\
-        ${HOMEgfs}/scripts/exglobal_atmos_products.sh "\$@"
+        ${HOMEgfs}/dev/scripts/exglobal_atmos_products.sh "\$@"
 EOF_ATMOS_PRODUCTS
 
 chmod +x "${eap_script}"
