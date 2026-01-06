@@ -13,7 +13,7 @@ module load py-jinja2
 module load py-pyyaml
 
 # shellcheck disable=SC2034
-xflowPATH="${HOMEgfs}/ush:${HOMEgfs}/ush/python:${HOMEgfs}/sorc/wxflow/src"
+wxflowPATH="${HOMEgfs}/ush:${HOMEgfs}/ush/python:${HOMEgfs}/sorc/wxflow/src"
 export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${wxflowPATH}"
 
 python "$@"
