@@ -118,52 +118,52 @@ _nonflag_option_count=0
 
 while [[ $# -gt 0 && "$1" != "--" ]]; do
     while getopts ":H:bDuy:Y:GESCA:ce:t:r:vVdhR" option; do
-       case "${option}" in
-         H)
-            HOMEgfs="${OPTARG}"
-            _specified_home=true
-            if [[ ! -d "${HOMEgfs}" ]]; then
-               echo "Specified HOMEgfs directory (${HOMEgfs}) does not exist"
-               exit 1
-            fi
-            ;;
-         b) _build=true ;;
-         D) _auto_del=true ;;
-         u) _update_submods=true ;;
-         y) # Start over with an empty _yaml_list
-            declare -a _yaml_list=()
-            for _yaml in ${OPTARG}; do
-               # Strip .yaml from the end of each and append to _yaml_list
-               _yaml_list+=("${_yaml//.yaml/}")
-            done
-            _specified_yaml_list=true
-            ;;
-         Y) _yaml_dir="${OPTARG}" && _specified_yaml_dir=true ;;
-         G) _run_all_gfs=true ;;
-         E) _run_all_gefs=true ;;
-         S) _run_all_sfs=true ;;
-         C) _run_all_gcafs=true ;;
-         c) _update_cron=true ;;
-         e) _email="${OPTARG}" && _set_email=true ;;
-         t) _tag="_${OPTARG}" ;;
-         v) _verbose=true ;;
-         V) _very_verbose=true && _verbose=true && _verbose_flag="-v" ;;
-         R) _run_with_container=true ;;
-         r) _rocotorun_fullpath="${OPTARG}" && _has_rocotorun=true ;;
-         A) _set_account=true && _hpc_account="${OPTARG}" ;;
-         d) _debug=true && _very_verbose=true && _verbose=true && _verbose_flag="-v" && PS4='${LINENO}: ' ;;
-         h) _usage && exit 0 ;;
-         :)
-           echo "[${BASH_SOURCE[0]}]: ${option} requires an argument"
-           _usage
-           exit 1
-           ;;
-         *)
-           echo "[${BASH_SOURCE[0]}]: Unrecognized option: ${option}"
-           _usage
-           exit 1
-           ;;
-       esac
+        case "${option}" in
+            H)
+                HOMEgfs="${OPTARG}"
+                _specified_home=true
+                if [[ ! -d "${HOMEgfs}" ]]; then
+                    echo "Specified HOMEgfs directory (${HOMEgfs}) does not exist"
+                    exit 1
+                fi
+                ;;
+            b) _build=true ;;
+            D) _auto_del=true ;;
+            u) _update_submods=true ;;
+            y) # Start over with an empty _yaml_list
+                declare -a _yaml_list=()
+                for _yaml in ${OPTARG}; do
+                    # Strip .yaml from the end of each and append to _yaml_list
+                    _yaml_list+=("${_yaml//.yaml/}")
+                done
+                _specified_yaml_list=true
+                ;;
+            Y) _yaml_dir="${OPTARG}" && _specified_yaml_dir=true ;;
+            G) _run_all_gfs=true ;;
+            E) _run_all_gefs=true ;;
+            S) _run_all_sfs=true ;;
+            C) _run_all_gcafs=true ;;
+            c) _update_cron=true ;;
+            e) _email="${OPTARG}" && _set_email=true ;;
+            t) _tag="_${OPTARG}" ;;
+            v) _verbose=true ;;
+            V) _very_verbose=true && _verbose=true && _verbose_flag="-v" ;;
+            R) _run_with_container=true ;;
+            r) _rocotorun_fullpath="${OPTARG}" && _has_rocotorun=true ;;
+            A) _set_account=true && _hpc_account="${OPTARG}" ;;
+            d) _debug=true && _very_verbose=true && _verbose=true && _verbose_flag="-v" && PS4='${LINENO}: ' ;;
+            h) _usage && exit 0 ;;
+            :)
+                echo "[${BASH_SOURCE[0]}]: ${option} requires an argument"
+                _usage
+                exit 1
+                ;;
+            *)
+                echo "[${BASH_SOURCE[0]}]: Unrecognized option: ${option}"
+                _usage
+                exit 1
+                ;;
+        esac
     done
 
     if [[ ${OPTIND:-0} -gt 0 ]]; then
@@ -281,14 +281,14 @@ if [[ "${_specified_home}" == "false" ]]; then
 fi
 
 if [[ "${_verbose}" == "true" ]]; then
-   echo "_run_with_container: ${_run_with_container}"
+    echo "_run_with_container: ${_run_with_container}"
 fi
 
 # Set RUN_WITH_CONTAINER if it is set by the user
 if [[ "${_run_with_container}" == "true" ]]; then
-   sed -i "s?RUN_WITH_CONTAINER=NO?RUN_WITH_CONTAINER=YES?g" ../../ush/preamble.sh
+    sed -i "s?RUN_WITH_CONTAINER=NO?RUN_WITH_CONTAINER=YES?g" ../../ush/preamble.sh
 else
-   sed -i "s?RUN_WITH_CONTAINER=YES?RUN_WITH_CONTAINER=NO?g" ../../ush/preamble.sh
+    sed -i "s?RUN_WITH_CONTAINER=YES?RUN_WITH_CONTAINER=NO?g" ../../ush/preamble.sh
 fi
 
 # Set the _yaml_dir to HOMEgfs/dev/ci/cases/pr if not explicitly set
@@ -538,7 +538,7 @@ if [[ "${_verbose}" == true ]]; then
 fi
 for _case in "${_yaml_list[@]}"; do
     if [[ "${_verbose}" == false ]]; then
-       echo "${_case}"
+        echo "${_case}"
     fi
     _pslot="${_case}${_tag}"
     if [[ "${_run_with_container}" == "true" ]]; then
@@ -551,20 +551,20 @@ for _case in "${_yaml_list[@]}"; do
         _create_exp_cmd="./create_experiment.py -y ${_yaml_dir}/${_case}.yaml --overwrite"
     fi
     if [[ "${_verbose}" == true ]]; then
-       pslot=${_pslot} RUNTESTS=${_runtests} ${_create_exp_cmd}
+        pslot=${_pslot} RUNTESTS=${_runtests} ${_create_exp_cmd}
     else
-       if ! pslot=${_pslot} RUNTESTS=${_runtests} ${_create_exp_cmd} 2> stderr 1> stdout; then
-          _output=$(cat stdout stderr)
-          _message="The create_experiment command (${_create_exp_cmd}) failed with a non-zero status.  Output:"
-          _message="${_message}"$'\n'"${_output}"
-          if [[ "${_set_email}" == true ]]; then
-             send_email "${_message}"
-          fi
-          echo "${_message}"
-          rm -f stdout stderr
-          exit 12
-       fi
-       rm -f stdout stderr
+        if ! pslot=${_pslot} RUNTESTS=${_runtests} ${_create_exp_cmd} 2> stderr 1> stdout; then
+            _output=$(cat stdout stderr)
+            _message="The create_experiment command (${_create_exp_cmd}) failed with a non-zero status.  Output:"
+            _message="${_message}"$'\n'"${_output}"
+            if [[ "${_set_email}" == true ]]; then
+                send_email "${_message}"
+            fi
+            echo "${_message}"
+            rm -f stdout stderr
+            exit 12
+        fi
+        rm -f stdout stderr
     fi
 
     # Check if DATAROOT is already present; eval will return just DATAROOT from the sourcing

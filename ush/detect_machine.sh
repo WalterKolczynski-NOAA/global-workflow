@@ -10,8 +10,8 @@
 
 # overwrite MACHINE_ID if in container
 if [[ -v SINGULARITY_CONTAINER ]]; then
-  # We are in a container
-  MACHINE_ID=container
+    # We are in a container
+    MACHINE_ID=container
 fi
 
 # If the MACHINE_ID variable is set, skip this script.
