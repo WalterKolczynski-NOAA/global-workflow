@@ -12,7 +12,8 @@ module load py-numpy
 module load py-jinja2
 module load py-pyyaml
 
-xflowPATH=${HOMEgfs}/ush:${HOMEgfs}/ush/python:${HOMEgfs}/sorc/wxflow/src
-export PYTHONPATH=\${PYTHONPATH:+\${PYTHONPATH}:}${wxflowPATH}
+# shellcheck disable=SC2034
+xflowPATH="${HOMEgfs}/ush:${HOMEgfs}/ush/python:${HOMEgfs}/sorc/wxflow/src"
+export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${wxflowPATH}"
 
 python "$@"
