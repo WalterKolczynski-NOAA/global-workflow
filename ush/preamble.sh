@@ -190,7 +190,7 @@ export RUN_WITH_CONTAINER=NO
 if [[ "${RUN_WITH_CONTAINER}" == "YES" ]]; then
     # if within container, will run python executbale inside container,
     # also need to tell some scripts that it is run in container, with "-c" option.
-    export PYCMD="${HOMEgfs}"/exec/run_python.sh
+    export PYCMD="${HOMEgfs}/exec/run_python.sh"
     export PYEXTRAARGS=" -c -v"
 else
     export PYCMD=python
