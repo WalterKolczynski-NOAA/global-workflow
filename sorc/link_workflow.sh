@@ -76,7 +76,8 @@ case "${machine}" in
     "hercules") FIX_DIR="/work2/noaa/global/role-global/fix" ;;
     "gaeac5") FIX_DIR="/gpfs/f5/ufs-ard/world-shared/global/glopara/data/fix" ;;
     "gaeac6") FIX_DIR="/gpfs/f6/drsa-precip3/world-shared/role.glopara/fix" ;;
-    "noaacloud") FIX_DIR="/lustre/fix" ;;
+    "noaacloud") FIX_DIR="/contrib/global-workflow-shared-data/fix" ;;
+    #"noaacloud") FIX_DIR="/lustre/fix" ;;
     *)
         echo "FATAL: Unknown target machine ${machine}, couldn't set FIX_DIR"
         exit 1
@@ -165,7 +166,7 @@ for file in ice_gfs.csv ice_gefs.csv ocean_gfs.csv ocean_gefs.csv ocnicepost.nml
     ${LINK_OR_COPY} "${HOMEgfs}/sorc/gfs_utils.fd/parm/ocnicepost/${file}" .
 done
 
-cd "${HOMEgfs}/scripts" || exit 8
+cd "${HOMEgfs}/dev/scripts" || exit 8
 if [[ -d "${HOMEgfs}/sorc/gdas.cd" ]]; then
     declare -a gdas_scripts=(exglobal_prep_ocean_obs.py)
     for gdas_script in "${gdas_scripts[@]}"; do

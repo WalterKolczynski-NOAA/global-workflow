@@ -89,6 +89,7 @@ cat > "${exec_script}" << EOF_SCRIPT
  singularity exec \\
         ${bindings} \\
         ${container} \\
+        ${HOMEgfs}/dev/container/env/gfsutils-env.sh \\
         ${HOMEgfs}/dev/jobs/${item}
 EOF_SCRIPT
 

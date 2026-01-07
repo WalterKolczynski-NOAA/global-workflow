@@ -37,7 +37,7 @@ elif [[ ${MACHINE_ID} = gaea* ]] ; then
 elif [[ ${MACHINE_ID} = noaacloud* ]] ; then
    TOPICDIR=/bucket/global-workflow-shared-data/ICSDIR
    container=/contrib/containers/${img}
-   rundir=/lustre/${USER}/run
+   rundir=/lustre/${USER}/run/container
    bindings="--env \"I_MPI_FABRICS=shm:ofi,I_MPI_DEBUG=6\" -B /apps/slurm/default/lib/libpmi2.so -B /contrib -B /lustre -B /bucket"
   #bindings="-B /apps/slurm/default/lib/libpmi2.so -B /contrib -B /lustre -B /bucket"
    HPC_ACCOUNT=${USER}
