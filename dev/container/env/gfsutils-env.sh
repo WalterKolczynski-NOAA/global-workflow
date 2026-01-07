@@ -13,4 +13,3 @@ export UTILROOT=${prod_util_ROOT}
 if [[ $# -gt 0 ]]; then
     "$@"
 fi
-
