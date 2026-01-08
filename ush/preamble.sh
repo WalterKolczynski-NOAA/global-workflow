@@ -34,16 +34,9 @@ declare -x PS4='+ $(basename ${BASH_SOURCE[0]:-${FUNCNAME[0]:-"Unknown"}})[${LIN
 set_strict() {
     if [[ ${STRICT:-"YES"} == "YES" ]]; then
         # Exit on error or undefined variable
-        set -eu
-        # Exit on error in a pipeline (e.g. if and command in "cmd | cmd2" fails)
-        set -o pipefail
+        # TODO: Also error in a pipeline (e.g. if and command in "cmd | cmd2" fails)
+        set -eu # -o pipefail
     fi
-}
-
-unset_strict() {
-    # Turn off strict mode
-    set +eu
-    set +o pipefail
 }
 
 set_trace() {
@@ -184,24 +177,10 @@ trap "postamble ${_calling_script} ${start_time} \$?" EXIT
 
 source "${HOMEgfs}/ush/bash_utils.sh"
 
-# Define if run with container, default as NO.
-export RUN_WITH_CONTAINER=NO
-
-if [[ "${RUN_WITH_CONTAINER}" == "YES" ]]; then
-    # if within container, will run python executbale inside container,
-    # also need to tell some scripts that it is run in container, with "-c" option.
-    export PYCMD="${HOMEgfs}/exec/run_python.sh"
-    export PYEXTRAARGS=" -c -v"
-else
-    export PYCMD=python
-    export PYEXTRAARGS=""
-fi
-
 # Turn on our settings
 shopt -s nullglob # Allow null globs instead of treating * as literal
 export SHELLOPTS
 declare -xf set_strict
-declare -xf unset_strict
 declare -xf set_trace
 declare -xf postamble
 declare -xf err_exit

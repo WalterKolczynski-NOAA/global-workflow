@@ -176,7 +176,7 @@ else
 fi
 
 cpreq "${EXECgfs}/${FCSTEXEC}" "${DATA}/"
-${APRUN_UFS} "${DATA}/${FCSTEXEC}" 1>&1 2>&2 && true
+${APRUN_UFS} ${CONTAINER_FORECAST:-} "${DATA}/${FCSTEXEC}" 1>&1 2>&2 && true
 export err=$?
 if [[ ${err} -ne 0 ]]; then
     err_exit "The forecast failed to run to completion!"

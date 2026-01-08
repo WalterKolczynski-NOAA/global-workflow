@@ -1,14 +1,5 @@
 #! /usr/bin/env bash
 
-source "${HOMEgfs}/dev/ush/load_modules.sh" ufswm
-status=$?
-if [[ ${status} -ne 0 ]]; then
-    exit "${status}"
-fi
-
-export job="waveinit"
-export jobid="${job}.$$"
-
 source "${HOMEgfs}/ush/jjob_header.sh" -e "waveinit" -c "base wave waveinit"
 
 export MP_PULSE=0
@@ -24,7 +15,7 @@ export wavempexec=${wavempexec:-"mpirun -n"}
 export wave_mpmd=${wave_mpmd:-"cfp"}
 
 # Execute the Script
-"${SCRgfs}/exgfs_wave_init.sh" && true
+${CONTAINER_GFSUTILS:-} "${SCRgfs}/exgfs_wave_init.sh" && true
 export err=$?
 if [[ ${err} -ne 0 ]]; then
     err_exit

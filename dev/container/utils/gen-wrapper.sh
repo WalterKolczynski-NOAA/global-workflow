@@ -72,7 +72,7 @@ singularity exec \\
     "${python_env_script}" "\$@"
 EOF_EXEC_PYTHON
 
-sed -i 's/RUN_WITH_CONTAINER=NO/RUN_WITH_CONTAINER=YES/g' "${HOMEgfs}/ush/preamble.sh"
+sed -i 's/RUN_WITH_CONTAINER=NO/RUN_WITH_CONTAINER=YES/g' "${HOMEgfs}/ush/jjob_header.sh"
 chmod +x "${exec_python_script}"
 chmod +x "${python_env_script}"
 
