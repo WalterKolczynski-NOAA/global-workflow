@@ -49,36 +49,23 @@ fi
 set -x
 
 mkdir -p "${rundir}"
-mkdir -p "${HOMEDIR}/exec"
 
 cd "${HOMEDIR}/dev/workflow" || exit 1
 
 if [[ "${run_with_container}" == "YES" ]]; then
-    "${HOMEDIR}/dev/container/utils/gen-wrapper.sh" -H "${HOMEDIR}" -c "${container}" -b "${bindings}" -v
-
-    TOPICDIR="${TOPICDIR}" \
-        RUNTESTS="${rundir}" \
-        RUNDIRS="${rundir}" \
-        ./generate_workflows.sh \
-        -H "${HOMEDIR}" \
-        -y "${yamllist}" \
-        -Y "${HOMEDIR}/dev/ci/cases/${casetype}" \
-        -A "${HPC_ACCOUNT}" \
-        -e "${USER}@noaa.gov" \
-        -r "${rocotocmd}" \
-        -v -R
-
-    "${HOMEDIR}/dev/container/utils/create-atmos-products.sh" -H "${HOMEDIR}" -c "${container}" -b "${bindings}"
-    "${HOMEDIR}/dev/container/utils/create-container-links.sh" -H "${HOMEDIR}" -c "${container}" -b "${bindings}" -M "${MACHINE_ID}"
+    CONTAINER_OPTIONS="-R -r \"${rocotocmd}\""
 else
-    TOPICDIR="${TOPICDIR}" \
-        RUNTESTS="${rundir}" \
-        RUNDIRS="${rundir}" \
-        ./generate_workflows.sh \
+    CONTAINER_OPTIONS=""
+fi
+
+TOPICDIR="${TOPICDIR}" \
+RUNTESTS="${rundir}" \
+RUNDIRS="${rundir}" \
+./generate_workflows.sh \
         -H "${HOMEDIR}" \
         -y "${yamllist}" \
         -Y "${HOMEDIR}/dev/ci/cases/${casetype}" \
         -A "${HPC_ACCOUNT}" \
         -e "${USER}@noaa.gov" \
+        ${CONTAINER_OPTIONS} \
         -v
-fi

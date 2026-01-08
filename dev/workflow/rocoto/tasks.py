@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import numpy as np
 from applications.applications import AppConfig
 import rocoto.rocoto as rocoto
@@ -54,7 +55,10 @@ class Tasks:
         # Save base in the internal state (never know where it may be needed)
         self._base = self._configs['base']
 
-        self.HOMEgfs = self._base['HOMEgfs']
+        if 'HOMEgfs' in os.environ:
+            self.HOMEgfs = os.getenv('HOMEgfs')
+        else:
+            self.HOMEgfs = self._base['HOMEgfs']
         self.rotdir = self._base['ROTDIR']
         self.pslot = self._base['PSLOT']
         if self.run == "enkfgfs":

@@ -120,7 +120,7 @@ while [[ $# -gt 0 && "$1" != "--" ]]; do
     while getopts ":H:bDuy:Y:GESCA:ce:t:r:vVdhR" option; do
         case "${option}" in
             H)
-                HOMEgfs="${OPTARG}"
+                export HOMEgfs="${OPTARG}"
                 _specified_home=true
                 if [[ ! -d "${HOMEgfs}" ]]; then
                     echo "Specified HOMEgfs directory (${HOMEgfs}) does not exist"
@@ -274,7 +274,7 @@ fi
 # Set HOMEgfs if it wasn't set by the user
 if [[ "${_specified_home}" == "false" ]]; then
     script_relpath="$(dirname "${BASH_SOURCE[0]}")"
-    HOMEgfs="$(cd "${script_relpath}" && git rev-parse --show-toplevel)"
+    export HOMEgfs="$(cd "${script_relpath}" && git rev-parse --show-toplevel)"
     if [[ "${_verbose}" == "true" ]]; then
         printf "Setting HOMEgfs to %s\n\n" "${HOMEgfs}"
     fi
@@ -543,9 +543,9 @@ for _case in "${_yaml_list[@]}"; do
     _pslot="${_case}${_tag}"
     if [[ "${_run_with_container}" == "true" ]]; then
         if [[ "${_has_rocotorun}" == "true" ]]; then
-            _create_exp_cmd="../../exec/run_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml -r ${_rocotorun_fullpath} --overwrite"
+            _create_exp_cmd="../../dev/container/prefix/container_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml -r ${_rocotorun_fullpath} --overwrite"
         else
-            _create_exp_cmd="../../exec/run_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml --overwrite"
+            _create_exp_cmd="../../dev/container/prefix/container_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml --overwrite"
         fi
     else
         _create_exp_cmd="./create_experiment.py -y ${_yaml_dir}/${_case}.yaml --overwrite"
@@ -668,6 +668,7 @@ if [[ "${_debug}" == "false" ]]; then
     rm -f final.cron existing.cron tests.cron "${_verbose_flag}"
 fi
 
+unset HOMEgfs
 echo "Success!!"
 if [[ "${_set_email}" == true && "${_debug}" == "true" ]]; then
     final_message=$'Success!\n'"${final_message:-}"

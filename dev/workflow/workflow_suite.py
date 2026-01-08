@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 from typing import Dict
 from applications.applications import AppConfig
 from wxflow import to_timedelta
@@ -55,7 +56,10 @@ class WorkflowSuite(ABC):
         self.use_scrontab = self.host_info.get("USE_SCRONTAB", False)
         # Add ACCOUNT to host_info, with that from config.base
         self.host_info.ACCOUNT = self._base['ACCOUNT']
-        self.HOMEgfs = self._base['HOMEgfs']
+        if 'HOMEgfs' in os.environ:
+            self.HOMEgfs = os.getenv('HOMEgfs')
+        else:
+            self.HOMEgfs = self._base['HOMEgfs']
         self.expdir = self._base['EXPDIR']
         self.pslot = self._base['PSLOT']
 
