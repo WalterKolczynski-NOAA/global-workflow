@@ -23,11 +23,7 @@ export PREFIX="${RUN}.t${cyc}z."
 
 ###############################################################
 # Run exglobal script
-if [[ "${RUN_WITH_CONTAINER}" == "YES" ]]; then
-    "${HOMEgfs}/exec/exglobal_atmos_products.sh" && true
-else
-    "${SCRgfs}/exglobal_atmos_products.sh" && true
-fi
+${CONTAINER_GFSUTILS:-} "${SCRgfs}/exglobal_atmos_products.sh" && true
 export err=$?
 if [[ ${err} -ne 0 ]]; then
     err_exit
