@@ -123,6 +123,8 @@ export RUN_WITH_CONTAINER=NO
 if [[ "${RUN_WITH_CONTAINER}" == "YES" ]]; then
     # if within container, will run python executbale inside container,
     # also need to tell some scripts that it is run in container, with "-c" option.
+    export CONTAINER_BINDINGS="-B /scratch3 -B /scratch4"
+    export CONTAINER_SIF="/scratch3/NCEPDEV/nems/role.epic/containers/ubuntu22.04-intel-ufs-env-v1.9.2.img"
     export CONTAINER_FORECAST="${HOMEgfs}/dev/container/prefix/container_forecast.sh"
     export CONTAINER_GFSUTILS="${HOMEgfs}/dev/container/prefix/container_gfsutils.sh"
     export PYCMD="${HOMEgfs}/dev/container/prefix/container_python.sh"
