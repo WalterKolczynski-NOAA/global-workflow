@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+# Define if run with container, default as NO.
+export RUN_WITH_CONTAINER=NO
+
+#export CONTAINER_FORECAST=""
+#export CONTAINER_GFSUTILS=""
+#export PYCMD=python
+#export PYEXTRAARGS=""

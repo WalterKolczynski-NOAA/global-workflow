@@ -58,7 +58,7 @@ cat << EOF
   INFO: The proc_num corresponds to the line in '${mpmd_cmdfile}'
 EOF
 
-if [[ "${RUN_WITH_CONTAINER}" == "YES" ]]; then
+if [[ -v SINGULARITY_CONTAINER ]]; then
     # Redirect output from each process to its own stdout
     # Read the incoming cmdfile and create mpiexec usable cmdfile
     nm=0

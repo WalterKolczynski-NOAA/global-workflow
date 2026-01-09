@@ -3,6 +3,6 @@ LD_LIBRARY_PATH=$(dirname "/scratch3/NCEPDEV/nems/role.epic/containers/ubuntu22.
 export LD_LIBRARY_PATH
 
 singularity exec \
-    "${CONTAINER_BINDINGS}" \
+    ${CONTAINER_BINDINGS} \
     "${CONTAINER_SIF}" \
     "${HOMEgfs}/dev/container/env/python-env.sh" "$@"
