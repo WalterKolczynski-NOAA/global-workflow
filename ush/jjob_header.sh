@@ -117,7 +117,8 @@ if [[ ${err} -ne 0 ]]; then
 fi
 
 # Define if run with container, default as NO.
-export RUN_WITH_CONTAINER=YES
+#export RUN_WITH_CONTAINER=NO
+export RUN_WITH_CONTAINER=NO
 
 if [[ "${RUN_WITH_CONTAINER}" == "YES" ]]; then
     # if within container, will run python executbale inside container,
@@ -126,9 +127,9 @@ if [[ "${RUN_WITH_CONTAINER}" == "YES" ]]; then
     export CONTAINER_GFSUTILS="${HOMEgfs}/dev/container/prefix/container_gfsutils.sh"
     export PYCMD="${HOMEgfs}/dev/container/prefix/container_python.sh"
     export PYEXTRAARGS=" -c -v"
-else
-    export CONTAINER_FORECAST=""
-    export CONTAINER_GFSUTILS=""
-    export PYCMD=python
-    export PYEXTRAARGS=""
+#else
+#    export CONTAINER_FORECAST=""
+#    export CONTAINER_GFSUTILS=""
+#    export PYCMD=python
+#    export PYEXTRAARGS=""
 fi

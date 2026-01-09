@@ -81,7 +81,7 @@ else
             ((nm = nm + 1))
         done < "${cmdfile}"
 
-        unset_strict
+        # unset_strict
         # shellcheck disable=SC2086
         ${launcher:-} ${mpmd_opt:-} -n ${nprocs} "${mpmd_cmdfile}"
         err=$?

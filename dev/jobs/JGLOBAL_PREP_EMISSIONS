@@ -18,7 +18,7 @@ mkdir -p "${COMOUT_CHEM_INPUT}"
 ###############################################################
 # Run relevant script
 EXSCRIPT=${PREP_EMISSIONS_PY:-${SCRgfs}/exglobal_prep_emissions.py}
-"${PYCMD}" "${EXSCRIPT}" && true
+"${PYCMD:-python}" "${EXSCRIPT:-}" && true
 export err=$?
 if [[ ${err} -ne 0 ]]; then
     err_exit "Error executing ${EXSCRIPT}, ABORT!"

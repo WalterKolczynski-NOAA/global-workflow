@@ -286,9 +286,9 @@ fi
 
 # Set RUN_WITH_CONTAINER if it is set by the user
 if [[ "${_run_with_container}" == "true" ]]; then
-    sed -i "s?RUN_WITH_CONTAINER=NO?RUN_WITH_CONTAINER=YES?g" ../../ush/preamble.sh
+    sed -i "s?RUN_WITH_CONTAINER=NO?RUN_WITH_CONTAINER=YES?g" ../../ush/jjob_header.sh
 else
-    sed -i "s?RUN_WITH_CONTAINER=YES?RUN_WITH_CONTAINER=NO?g" ../../ush/preamble.sh
+    sed -i "s?RUN_WITH_CONTAINER=YES?RUN_WITH_CONTAINER=NO?g" ../../ush/jjob_header.sh
 fi
 
 # Set the _yaml_dir to HOMEgfs/dev/ci/cases/pr if not explicitly set
