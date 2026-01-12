@@ -197,3 +197,12 @@ versions/run.ver
 
 # jcb checkout and symlinks
 ush/python/jcb
+
+# env symlinks
+env/CONTAINER.env
+
+# dev/container env symlinks
+dev/container/env
+
+# dev/container prefix symlinks
+dev/container/prefix
