@@ -284,13 +284,6 @@ if [[ "${_verbose}" == "true" ]]; then
     echo "_run_with_container: ${_run_with_container}"
 fi
 
-# Set RUN_WITH_CONTAINER if it is set by the user
-if [[ "${_run_with_container}" == "true" ]]; then
-    sed -i "s?RUN_WITH_CONTAINER=NO?RUN_WITH_CONTAINER=YES?g" ../../ush/jjob_header.sh
-else
-    sed -i "s?RUN_WITH_CONTAINER=YES?RUN_WITH_CONTAINER=NO?g" ../../ush/jjob_header.sh
-fi
-
 # Set the _yaml_dir to HOMEgfs/dev/ci/cases/pr if not explicitly set
 if [[ "${_specified_yaml_dir}" == false ]]; then
     _yaml_dir="${HOMEgfs}/dev/ci/cases/pr"
@@ -536,18 +529,22 @@ echo "Running create_experiment.py for ${#_yaml_list[@]} cases"
 if [[ "${_verbose}" == true ]]; then
     printf "Selected cases: %s\n\n" "${_yaml_list[*]}"
 fi
+
 for _case in "${_yaml_list[@]}"; do
     if [[ "${_verbose}" == false ]]; then
         echo "${_case}"
     fi
     _pslot="${_case}${_tag}"
     if [[ "${_run_with_container}" == "true" ]]; then
+        ln -sf ${HOMEgfs}/env/CONTAINER4${machine} ${HOMEgfs}/env/CONTAINER.env
+        source ${HOMEgfs}/env/CONTAINER.env
         if [[ "${_has_rocotorun}" == "true" ]]; then
-            _create_exp_cmd="../../dev/container/prefix/container_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml -r ${_rocotorun_fullpath} --overwrite"
+            _create_exp_cmd="${HOMEgfs}/dev/container/prefix/container_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml -r ${_rocotorun_fullpath} --overwrite"
         else
-            _create_exp_cmd="../../dev/container/prefix/container_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml --overwrite"
+            _create_exp_cmd="${HOMEgfs}/dev/container/prefix/container_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml --overwrite"
         fi
     else
+        ln -sf ${HOMEgfs}/env/CONTAINER4host ${HOMEgfs}/env/CONTAINER.env
         _create_exp_cmd="./create_experiment.py -y ${_yaml_dir}/${_case}.yaml --overwrite"
     fi
     if [[ "${_verbose}" == true ]]; then

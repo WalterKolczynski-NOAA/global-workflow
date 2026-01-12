@@ -20,26 +20,18 @@ yamllist="C48_S2SW"
 HOMEDIR=${HOMEgfs}
 img=ubuntu22.04-intel-ufs-env-v1.9.2.img
 if [[ ${MACHINE_ID} = ursa* ]]; then
-    container="/scratch3/NCEPDEV/nems/role.epic/containers/${img}"
     rundir="/scratch3/NAGAPE/epic/${USER}/run/prefix"
-    bindings="-B /scratch3 -B /scratch4"
     HPC_ACCOUNT=epic
 
     module load rocoto/1.3.7
     rocotocmd=$(command -v rocotorun)
 elif [[ ${MACHINE_ID} = gaea* ]]; then
-    container="/gpfs/f6/scratch/Wei.Huang/container/${img}"
-    rundir="/gpfs/f6/scratch/${USER}/run"
-    bindings="-B /gpfs/f6/scratch -B /ncrc/home1/${USER}"
+    rundir="/gpfs/f6/scratch/${USER}/run/prefix"
     HPC_ACCOUNT=bil-fire8
 
     rocotocmd=/autofs/ncrc-svm1_home2/Christopher.W.Harrop/rocoto-1.3.7/bin/rocotorun
 elif [[ ${MACHINE_ID} = noaacloud* ]]; then
-    TOPICDIR=/bucket/global-workflow-shared-data/ICSDIR
-    container="/contrib/containers/${img}"
     rundir="/lustre/${USER}/run"
-    bindings="--env \"I_MPI_FABRICS=shm:ofi,I_MPI_DEBUG=6\" -B /apps/slurm/default/lib/libpmi2.so -B /contrib -B /lustre -B /bucket"
-    #bindings="-B /apps/slurm/default/lib/libpmi2.so -B /contrib -B /lustre -B /bucket"
     HPC_ACCOUNT="${USER}"
 
     module load rocoto/1.3.7
@@ -58,9 +50,7 @@ else
     CONTAINER_OPTIONS=""
 fi
 
-TOPICDIR="${TOPICDIR}" \
 RUNTESTS="${rundir}" \
-RUNDIRS="${rundir}" \
 ./generate_workflows.sh \
         -H "${HOMEDIR}" \
         -y "${yamllist}" \
