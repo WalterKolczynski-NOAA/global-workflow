@@ -536,12 +536,20 @@ for _case in "${_yaml_list[@]}"; do
     fi
     _pslot="${_case}${_tag}"
     if [[ "${_run_with_container}" == "true" ]]; then
-        ln -sf ${HOMEgfs}/env/CONTAINER4${machine} ${HOMEgfs}/env/CONTAINER.env
+        lowercas_machine="${machine,,}"
+        UPPERCASE_MACHINE="${machine^^}"
+        ln -sf ${HOMEgfs}/env/CONTAINER4${lowercas_machine} ${HOMEgfs}/env/CONTAINER.env
         source ${HOMEgfs}/env/CONTAINER.env
+        if [[ -f ${HOMEgfs}/dev/container/${lowercas_machine}.env/${UPPERCASE_MACHINE}.env ]]; then
+             cp ${HOMEgfs}/dev/container/${lowercas_machine}.env/${UPPERCASE_MACHINE}.env \
+                 ${HOMEgfs}/env/${UPPERCASE_MACHINE}.env
+        fi
         if [[ "${_has_rocotorun}" == "true" ]]; then
-            _create_exp_cmd="${HOMEgfs}/dev/container/prefix/container_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml -r ${_rocotorun_fullpath} --overwrite"
+            _create_exp_cmd="${HOMEgfs}/dev/container/prefix/container_python.sh ./create_experiment.py \
+                -y ${_yaml_dir}/${_case}.yaml -r ${_rocotorun_fullpath} --overwrite"
         else
-            _create_exp_cmd="${HOMEgfs}/dev/container/prefix/container_python.sh ./create_experiment.py -y ${_yaml_dir}/${_case}.yaml --overwrite"
+            _create_exp_cmd="${HOMEgfs}/dev/container/prefix/container_python.sh ./create_experiment.py \
+                -y ${_yaml_dir}/${_case}.yaml --overwrite"
         fi
     else
         ln -sf ${HOMEgfs}/env/CONTAINER4host ${HOMEgfs}/env/CONTAINER.env
