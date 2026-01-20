@@ -46,6 +46,11 @@ cd "${HOMEDIR}/dev/workflow" || exit 1
 
 if [[ "${run_with_container}" == "YES" ]]; then
     CONTAINER_OPTIONS="-R -r \"${rocotocmd}\""
+
+    ln -sf ${MACHINE_ID}.env env
+    ln -sf ${MACHINE_ID}.prefix prefix
+    cp ${HOMEgfs}/env/CONTAINER4${MACHINE_ID} ${HOMEgfs}/env/CONTAINER.env
+    source ${HOMEgfs}/env/CONTAINER.env
 else
     CONTAINER_OPTIONS=""
 fi
