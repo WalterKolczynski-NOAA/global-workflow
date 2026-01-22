@@ -16,4 +16,6 @@ module load py-pyyaml
 wxflowPATH="${HOMEgfs}/ush:${HOMEgfs}/ush/python:${HOMEgfs}/sorc/wxflow/src"
 export PYTHONPATH="${PYTHONPATH:+${PYTHONPATH}:}${wxflowPATH}"
 
-python "$@"
+if [[ $# -gt 0 ]]; then
+    python "$@"
+fi

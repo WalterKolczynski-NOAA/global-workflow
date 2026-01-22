@@ -5,14 +5,10 @@ set -x
 HOMEgfs="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." > /dev/null 2>&1 && pwd)"
 source "${HOMEgfs}/ush/detect_machine.sh"
 
-if [[ ${MACHINE_ID} = ursa* ]]; then
-    source ${HOMEgfs}/env/CONTAINER4ursa
-elif [[ ${MACHINE_ID} = gaea* ]]; then
-    source ${HOMEgfs}/env/CONTAINER4gaeac6
-elif [[ ${MACHINE_ID} = noaacloud* ]]; then
-    CONTAINER_SIF="/contrib/containers/${sif}"
-    CONTAINER_BINDINGS="-B /contrib -B /lustre -B /bucket"
-fi
+ln -sf ${MACHINE_ID}.env env
+ln -sf ${MACHINE_ID}.prefix prefix
+cp ${HOMEgfs}/env/CONTAINER4${MACHINE_ID} ${HOMEgfs}/env/CONTAINER.env
+source ${HOMEgfs}/env/CONTAINER.env
 
 # shellcheck disable=SC2086
 singularity shell -e ${CONTAINER_BINDINGS} "${CONTAINER_SIF}"
