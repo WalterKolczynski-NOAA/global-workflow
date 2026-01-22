@@ -112,6 +112,8 @@ class Host:
                         f'hosts/{self.machine.lower()}.yaml'))
         try:
             info = YAMLFile(path=hostfile)
+            if self.machine == 'CONTAINER':
+                info['CLUSTERS'] = None
         except FileNotFoundError:
             raise FileNotFoundError(f'{hostfile} does not exist!')
         except IOError:
