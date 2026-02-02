@@ -59,56 +59,61 @@ cat << EOF
 EOF
 
 if [[ -v SINGULARITY_CONTAINER ]]; then
-    # Redirect output from each process to its own stdout
-    # Read the incoming cmdfile and create mpiexec usable cmdfile
+  # # Redirect output from each process to its own stdout
+  # # Read the incoming cmdfile and create mpiexec usable cmdfile
     nm=0
     # shellcheck disable=SC2312
     while IFS= read -r line; do
-        echo "Line ${nm}: ${line}"
         ${line} > "mpmd.${nm}.out" &
         ((nm = nm + 1))
     done < "${cmdfile}"
     wait
+
+  # while IFS= read -r line; do
+  #     echo "-n 1 ${line}" >> "${mpmd_cmdfile}"
+  #     ((nm = nm + 1))
+  # done < "${cmdfile}"
+
+  # mpiexec --app "${mpmd_cmdfile}"
     err=$?
+
+elif [[ "${launcher:-}" =~ ^srun.* ]]; then #  srun-based system e.g. Hera, Orion, etc.
+
+    # Slurm requires a counter in front of each line in the script
+    # Read the incoming cmdfile and create srun usable cmdfile
+    nm=0
+    while IFS= read -r line; do
+        echo "${nm} ${line}" >> "${mpmd_cmdfile}"
+        ((nm = nm + 1))
+    done < "${cmdfile}"
+
+    unset_strict
+    # shellcheck disable=SC2086
+    ${launcher:-} ${mpmd_opt:-} -n ${nprocs} "${mpmd_cmdfile}"
+    err=$?
+    set_strict
+
+elif [[ "${launcher:-}" =~ ^mpiexec.* ]]; then # mpiexec
+
+    # Redirect output from each process to its own stdout
+    # Read the incoming cmdfile and create mpiexec usable cmdfile
+    nm=0
+    echo "#!/bin/bash" >> "${mpmd_cmdfile}"
+    while IFS= read -r line; do
+        echo "${line} > mpmd.${nm}.out" >> "${mpmd_cmdfile}"
+        ((nm = nm + 1))
+    done < "${cmdfile}"
+    chmod 755 "${mpmd_cmdfile}"
+
+    # shellcheck disable=SC2086
+    ${launcher:-} -np ${nprocs} ${mpmd_opt:-} "${mpmd_cmdfile}"
+    err=$?
+
 else
-    if [[ "${launcher:-}" =~ ^srun.* ]]; then #  srun-based system e.g. Hera, Orion, etc.
 
-        # Slurm requires a counter in front of each line in the script
-        # Read the incoming cmdfile and create srun usable cmdfile
-        nm=0
-        while IFS= read -r line; do
-            echo "${nm} ${line}" >> "${mpmd_cmdfile}"
-            ((nm = nm + 1))
-        done < "${cmdfile}"
+    echo "FATAL ERROR: CFP is not usable with launcher: '${launcher:-}'"
+    err=1
 
-        # unset_strict
-        # shellcheck disable=SC2086
-        ${launcher:-} ${mpmd_opt:-} -n ${nprocs} "${mpmd_cmdfile}"
-        err=$?
-        set_strict
-
-    elif [[ "${launcher:-}" =~ ^mpiexec.* ]]; then # mpiexec
-
-        # Redirect output from each process to its own stdout
-        # Read the incoming cmdfile and create mpiexec usable cmdfile
-        nm=0
-        echo "#!/bin/bash" >> "${mpmd_cmdfile}"
-        while IFS= read -r line; do
-            echo "${line} > mpmd.${nm}.out" >> "${mpmd_cmdfile}"
-            ((nm = nm + 1))
-        done < "${cmdfile}"
-        chmod 755 "${mpmd_cmdfile}"
-
-        # shellcheck disable=SC2086
-        ${launcher:-} -np ${nprocs} ${mpmd_opt:-} "${mpmd_cmdfile}"
-        err=$?
-
-    else
-
-        echo "FATAL ERROR: CFP is not usable with launcher: '${launcher:-}'"
-        err=1
-
-    fi
 fi
 
 # On success concatenate processor specific output into a single mpmd.out
@@ -119,7 +124,9 @@ if [[ ${err} -eq 0 ]]; then
         cat "${file}" >> mpmd.out
         rm -f "${file}"
     done
-    cat mpmd.out
+    if [[ -f mpmd.out ]]; then
+	cat mpmd.out
+    fi
 fi
 
 exit "${err}"

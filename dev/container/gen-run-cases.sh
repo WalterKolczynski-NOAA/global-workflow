@@ -30,6 +30,16 @@ elif [[ ${MACHINE_ID} = gaea* ]]; then
     HPC_ACCOUNT=bil-fire8
 
     rocotocmd=/autofs/ncrc-svm1_home2/Christopher.W.Harrop/rocoto-1.3.7/bin/rocotorun
+elif [[ ${MACHINE_ID} = hercules* ]]; then
+    module load singularity
+    CONTAINER_SIF="/work2/noaa/epic/weihuang/containers/${sif}"
+    CONTAINER_BINDINGS="-B /work -B /work2"
+    rundir="/work2/noaa/epic/weihuang/run/prefix"
+    HPC_ACCOUNT=epic
+
+    module load contrib/0.1
+    module load rocoto/1.3.7
+    rocotocmd=$(command -v rocotorun)
 elif [[ ${MACHINE_ID} = noaacloud* ]]; then
     rundir="/lustre/${USER}/run"
     HPC_ACCOUNT="${USER}"
@@ -47,7 +57,7 @@ cd "${HOMEDIR}/dev/workflow" || exit 1
 if [[ "${run_with_container}" == "YES" ]]; then
     CONTAINER_OPTIONS="-R -r \"${rocotocmd}\""
 else
-    CONTAINER_OPTIONS=""
+    CONTAINER_OPTIONS=" "
 fi
 
 RUNTESTS="${rundir}" \
