@@ -34,7 +34,7 @@ export JYYYY=${PDY:0:4}
 ##############################################
 
 # Do not fail on errors or unassigned variables in external code
-# unset_strict
+unset_strict
 "${SCRIPTens_tracker}/exgfs_tc_genesis.sh" && true
 export err=$?
 set_strict

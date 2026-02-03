@@ -91,6 +91,24 @@ elif [[ "${launcher:-}" =~ ^srun.* ]]; then #  srun-based system e.g. Hera, Orio
     # shellcheck disable=SC2086
     ${launcher:-} ${mpmd_opt:-} -n ${nprocs} "${mpmd_cmdfile}"
     err=$?
+<<<<<<< HEAD
+=======
+
+elif [[ "${launcher:-}" =~ ^srun.* ]]; then #  srun-based system e.g. Hera, Orion, etc.
+
+    # Slurm requires a counter in front of each line in the script
+    # Read the incoming cmdfile and create srun usable cmdfile
+    nm=0
+    while IFS= read -r line; do
+        echo "${nm} ${line}" >> "${mpmd_cmdfile}"
+        ((nm = nm + 1))
+    done < "${cmdfile}"
+
+    unset_strict
+    # shellcheck disable=SC2086
+    ${launcher:-} ${mpmd_opt:-} -n ${nprocs} "${mpmd_cmdfile}"
+    err=$?
+>>>>>>> 9a0bff772719646a9cca07dafbdbfd9160de6782
     set_strict
 
 elif [[ "${launcher:-}" =~ ^mpiexec.* ]]; then # mpiexec

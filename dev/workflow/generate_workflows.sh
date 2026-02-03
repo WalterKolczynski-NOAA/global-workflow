@@ -544,14 +544,14 @@ for _case in "${_yaml_list[@]}"; do
     fi
     _pslot="${_case}${_tag}"
     if [[ "${_run_with_container}" == "true" ]]; then
-        lowercas_machine="${machine,,}"
-        UPPERCASE_MACHINE="${machine^^}"
-        ln -sf ${HOMEgfs}/env/CONTAINER4${lowercas_machine} ${HOMEgfs}/env/CONTAINER.env
-        source ${HOMEgfs}/env/CONTAINER.env
-        if [[ -f ${HOMEgfs}/dev/container/${lowercas_machine}.env/${UPPERCASE_MACHINE}.env ]]; then
-             cp ${HOMEgfs}/dev/container/${lowercas_machine}.env/${UPPERCASE_MACHINE}.env \
-                 ${HOMEgfs}/env/${UPPERCASE_MACHINE}.env
+        ln -sf ${HOMEgfs}/dev/container/hosts/${MACHINE_ID}/intel/env ${HOMEgfs}/dev/container/env
+        ln -sf ${HOMEgfs}/dev/container/hosts/${MACHINE_ID}/intel/prefix ${HOMEgfs}/dev/container/prefix
+        ln -sf ${HOMEgfs}/dev/container/hosts/${MACHINE_ID}/intel/env/CONTAINER.env ${HOMEgfs}/env/CONTAINER.env
+        UMID="${MACHINE_ID^^}"
+        if [[ -f ${HOMEgfs}/dev/container/hosts/${MACHINE_ID}/intel/env/${UMID}.env ]]; then
+            cp ${HOMEgfs}/dev/container/hosts/${MACHINE_ID}/intel/env/${UMID}.env ${HOMEgfs}/env/${UMID}.env
         fi
+        source ${HOMEgfs}/env/CONTAINER.env
         if [[ "${_has_rocotorun}" == "true" ]]; then
             _create_exp_cmd="${HOMEgfs}/dev/container/prefix/container_python.sh ./create_experiment.py \
                 -y ${_yaml_dir}/${_case}.yaml -r ${_rocotorun_fullpath} --overwrite"
