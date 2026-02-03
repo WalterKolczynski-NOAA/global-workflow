@@ -2072,7 +2072,6 @@ class GFSTasks(Tasks):
                      }
 
         metatask_dict = {'task_name': f'{self.run}_metp',
-                         'is_serial': True,
                          'task_dict': task_dict,
                          'var_dict': var_dict,
                          }
@@ -2817,7 +2816,7 @@ class GFSTasks(Tasks):
     def atmensanlfv3inc(self):
 
         deps = []
-        if self.options['lobsdiag_forenkf']:
+        if self.options['do_jediatmens_split_obssol']:
             dep_dict = {'type': 'task', 'name': f'{self.run}_atmensanlsol'}
         else:
             dep_dict = {'type': 'task', 'name': f'{self.run}_atmensanlletkf'}
