@@ -70,6 +70,7 @@ fi
 
 if [[ "${verbose}" == "YES" ]]; then
     set -x
+    declare -x PS4='+ $(basename ${BASH_SOURCE[0]:-${FUNCNAME[0]:-"Unknown"}})[${LINENO}]'
 fi
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" > /dev/null 2>&1 && pwd)"
@@ -78,7 +79,11 @@ HOMEgfs=$(cd "${script_dir}" && git rev-parse --show-toplevel)
 export HOMEgfs
 
 if [[ -v SINGULARITY_CONTAINER ]]; then
-    source ${HOMEgfs}/dev/container/env/python-env.sh
+    # Need to use dummy function to avoid passing arg list
+    load_python_env() {
+        source "${HOMEgfs}/dev/container/env/python-env.sh"
+    }
+    load_python_env
 else
     echo "Sourcing global-workflow modules ..."
     source "${HOMEgfs}/dev/ush/gw_setup.sh"
