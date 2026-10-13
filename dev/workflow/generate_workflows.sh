@@ -403,8 +403,7 @@ function select_all_yamls() {
         done
 
         if [[ ${_yaml_count} -eq 0 ]]; then
-            _message=$(
-                cat << EOF
+            _message=$(cat << EOF
                 "No YAMLs with net=${_net} were found in the directory (${_yaml_dir})!"
                 "Please check the directory/YAMLs and try again"
 EOF
@@ -485,8 +484,7 @@ if [[ "${_update_submods}" == "true" ]]; then
     else
         if ! ${_git_cmd} 2> stderr 1> stdout; then
             git_error_message=$(cat stdout stderr)
-            _message=$(
-                cat << EOM
+            _message=$(cat << EOM
                 "The git command (${_git_cmd}) failed with a non-zero status"
                 "Messages from git:"
                 "${git_error_message}"
@@ -623,8 +621,7 @@ for i in "${!_yaml_list[@]}"; do
         echo "The YAML file ${_yaml_file} does not exist!"
         echo "Please check the input yaml list and directory."
         if [[ "${_set_email}" == true ]]; then
-            _message=$(
-                cat << EOM
+            _message=$(cat << EOM
                 "generate_workflows.sh failed to find one of the specified YAMLs (${_yaml_file})"
                 "in the specified YAML directory (${_yaml_dir})."
 EOM
@@ -696,8 +693,7 @@ for _case in "${_yaml_list[@]}"; do
     else
         if ! pslot=${_pslot} RUNTESTS=${_runtests} ${_create_exp_cmd} 2> stderr 1> stdout; then
             _output=$(cat stdout stderr)
-            _message=$(
-                cat << EOF
+            _message=$(cat << EOF
                 "The create_experiment command (${_create_exp_cmd}) failed with a non-zero status.  Output:"
                 "${_output}"
 EOF
@@ -908,16 +904,14 @@ if [[ "${_update_cron}" == "true" ]]; then
 else
     mail_warning
     _cron_tests=$(cat tests.cron)
-    _message=$(
-        cat << EOF
+    _message=$(cat << EOF
         "Add the following to your crontab or scrontab to start running:"
         "${_cron_tests}"
 EOF
     )
     echo
     if [[ "${_set_email}" == true ]]; then
-        final_message=$(
-            cat << EOF
+        final_message=$(cat << EOF
             "${final_message:-}"
             "${_message}"
 EOF
@@ -940,8 +934,7 @@ fi
 
 echo "Success!!"
 if [[ "${_set_email}" == true && "${_debug}" == "true" ]]; then
-    final_message=$(
-        cat << EOF
+    final_message=$(cat << EOF
         "Success!"
         "${final_message:-}"
 EOF
