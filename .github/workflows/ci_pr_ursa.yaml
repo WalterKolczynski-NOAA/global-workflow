@@ -31,7 +31,7 @@ jobs:
     #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Building') &&
     #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Running') &&
     #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Passed')
-    # }}
+    # }} 
 
     steps:
       - name: Checkout PR Head
