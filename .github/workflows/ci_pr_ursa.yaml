@@ -14,24 +14,18 @@ concurrency:
   cancel-in-progress: true
 
 env:
-    PR_DIR: PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.ref }}
-    EXPDIR: ${{ PR_DIR }}/RUNTESTS/EXPDIR
+  PR_DIR: PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.ref }}
 
 jobs:
-  checkout_pr:
-    name: Checkout PR
-    runs-on: ursa
-    timeout-minutes: 1440
+  prepare:
+    name: Prepare List of CI Tests for Ursa
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
-    if: >-
-      ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa') }}
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa') }}
 
-    # ${{
-    #   contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Ready') &&
-    #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Building') &&
-    #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Running') &&
-    #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Passed')
-    # }} 
+    outputs:
+      test_list: ${{ steps.test_list.outputs.test_list }}
 
     steps:
       - name: Checkout PR Head
@@ -42,50 +36,46 @@ jobs:
           path: ${{ env.PR_DIR }}/global-workflow
           fetch-depth: 1
           clean: true
-          submodules: 'recursive'
+          submodules: false
 
-  build_pr:
-    name: Build PR
-    depends-on: checkout_pr
+      - name: List Tests
+        id: test_list
+        shell: bash
+        run: |
+          set -euo pipefail
+          json="$(MACHINE_ID='ursa' dev/workflow/generate_workflows.sh -L -GECS | jq -Rn '[inputs | select(length > 0)]')"
+          echo "test_list=${json}" >> "$GITHUB_OUTPUT"
+
+  run_tests:
+    name: Run PR Tests
+    needs: prepare
     runs-on: ursa
     timeout-minutes: 1440
 
+    strategy:
+      fail-fast: true
+      matrix:
+        test: ${{ fromJSON(needs.prepare.outputs.test_list) }}
+
     steps:
+      - name: Checkout PR Head
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          path: ${{ env.PR_DIR }}/global-workflow
+          fetch-depth: 1
+          clean: true
+          submodules: recursive
+
       - name: Build Global Workflow
         run: sorc/build_all.sh -cA epic all
 
       - name: Link Global Workflow
         run: sorc/link_workflow.sh
 
-  prepare_test_list:
-    name: Prepare PR Test List
-    depends-on: checkout_pr
-    runs-on: ursa
-    timeout-minutes: 1440
-
-    steps:
-      - name: List Tests
-        id: test_list
-        shell: bash
-        run: |
-          set -euo pipefail
-          json="$(dev/workflow/generate_workflows.sh -L -GECS | jq -Rn 'inputs | select(length > 0)]')"
-          echo "test_list=$json" >> $GITHUB_OUTPUT
-
-  run_tests
-    name: Run PR Tests
-    depends-on: [build_pr, prepare_test_list]
-    runs-on: ursa
-    timeout-minutes: 1440
-
-    strategy:
-      matrix:
-        fail-fast: true
-        test: ${{ fromJSON(needs.prepare_test_list.outputs.test_list) }}
-
-    steps:
       - name: Generate Test Experiments
-        run: dev/workflow/generate_workflows.sh -A epic -GECS ${{ env.PR_DIR }}/RUNTESTS
+        run: dev/workflow/generate_workflows.sh -A epic -GECS "${{ env.PR_DIR }}/RUNTESTS"
 
       - name: Run and Monitor PR Test ${{ matrix.test }}
-        run: dev/ci/scripts/run_check_ci.sh ${{ env.EXPDIR }} ${{ matrix.test }}
+        run: dev/ci/scripts/run_check_ci.sh "${{ env.PR_DIR }}/RUNTESTS" "${{ matrix.test }}"
