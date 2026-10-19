@@ -43,7 +43,11 @@ jobs:
         # Get the list of tests that will be run so we can use it as a matrix
         run: |
           set -euo pipefail
-          json="$(MACHINE_ID='ursa' dev/workflow/generate_workflows.sh -L -GECS | tail -n +9 | jq -Rn '[inputs | select(length > 0)]')"
+          json="$( \
+            MACHINE_ID='ursa' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
+            | tail -n +9 \
+            | jq -RMn --indent 0 '[inputs | select(length > 0)]')"
+
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
   run_tests:
