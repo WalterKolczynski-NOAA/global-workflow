@@ -40,7 +40,7 @@ jobs:
       - name: List Tests
         id: test_list
         shell: bash
-        # Get the list of tests that will be run so we can use it as a matrix
+        # Get the list of tests that will be run so we can use it as a matrix 
         run: |
           set -euo pipefail
           json="$( \
