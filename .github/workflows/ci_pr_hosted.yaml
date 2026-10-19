@@ -1,0 +1,58 @@
+name: PR CI Pipeline for Ursa
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  run_pr_ci:
+    name: Run PR CI tests on Ursa
+    runs-on: ursa
+    timeout-minutes: 1440
+
+    concurrency:
+      group: ci_pr_ursa-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    if: >-
+      ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa') }}
+
+    # ${{
+    #   contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Ready') &&
+    #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Building') &&
+    #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Running') &&
+    #   ! ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa-Passed')
+    # }}
+
+    steps:
+      # - name: Add CI running label
+      #   continue-on-error: true
+      #   uses: actions-ecosystem/action-add-labels@v1
+      #   with:
+      #     labels: CI-Ursa-Building
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout PR Head
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 1
+          clean: true
+          submodules: 'recursive'
+
+      - name: Build Global Workflow
+        run: sorc/build_all.sh -cA epic all
+
+      - name: Link Global Workflow
+        run: sorc/link_workflow.sh
+
+      # - name: Run PR Tests
+      #   run: dev/workflow/generate_workflows.sh -A epic -GECS /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.ref }}
+
+    
