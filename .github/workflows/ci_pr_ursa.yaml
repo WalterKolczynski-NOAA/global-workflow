@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PR_DIR: PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.ref }}
+  PR_DIR: PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
 
 jobs:
   prepare:
@@ -33,7 +33,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          path: ${{ env.PR_DIR }}/global-workflow
           fetch-depth: 1
           clean: true
           submodules: false
@@ -43,7 +42,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          json="$(MACHINE_ID='ursa' dev/workflow/generate_workflows.sh -L -GECS | jq -Rn '[inputs | select(length > 0)]')"
+          json="$(MACHINE_ID='ursa' dev/workflow/generate_workflows.sh -L -GECS | tail -n +9 | jq -Rn '[inputs | select(length > 0)]')"
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
   run_tests:
@@ -75,7 +74,7 @@ jobs:
         run: sorc/link_workflow.sh
 
       - name: Generate Test Experiments
-        run: dev/workflow/generate_workflows.sh -A epic -GECS "${{ env.PR_DIR }}/RUNTESTS"
+        run: dev/workflow/generate_workflows.sh -A epic -GECS -D "${{ env.PR_DIR }}/RUNTESTS"
 
       - name: Run and Monitor PR Test ${{ matrix.test }}
         run: dev/ci/scripts/run_check_ci.sh "${{ env.PR_DIR }}/RUNTESTS" "${{ matrix.test }}"
