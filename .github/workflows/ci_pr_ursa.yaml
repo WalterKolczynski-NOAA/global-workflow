@@ -31,6 +31,8 @@ jobs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
     
     steps:
+      # We need to check the code out in a specific location for use later,
+      #   so we have to check out the code manually instead of using the GH action
       - name: Prepare shared build root
         shell: bash
         run: |
