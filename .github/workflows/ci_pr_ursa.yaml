@@ -102,4 +102,4 @@ jobs:
 
       - name: Run and monitor PR test ${{ matrix.test }}
         working-directory: ${{ env.BUILD_ROOT }}
-        run: dev/ci/scripts/run_check_ci.sh "${{ env.RUNTESTS }}" "${{ matrix.test }}"
+        run: dev/ci/scripts/run_check_ci.sh "${{ env.PR_DIR }}" "${{ matrix.test }}"
