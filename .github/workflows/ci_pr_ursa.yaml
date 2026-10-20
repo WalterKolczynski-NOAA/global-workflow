@@ -36,8 +36,10 @@ jobs:
         run: |
           PR_DIR=${{ env.PR_ROOT }}/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
           BUILD_ROOT=${PR_DIR}/global-workflow
+          RUNTESTS="${PR_DIR}/RUNTESTS"
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+          echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
 
       # We need to check the code out in a specific location for use later,
       #   so we have to check out the code manually instead of using the GH action
@@ -74,6 +76,10 @@ jobs:
 
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
+      - name: Generate test experiments
+        working-directory: ${{ env.BUILD_ROOT }}/dev/workflow
+        run: ./generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}"
+
   run_tests:
     name: Run tests
     needs: build
@@ -91,14 +97,8 @@ jobs:
         run: |
           PR_DIR=${{ env.PR_ROOT }}/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
           BUILD_ROOT=${PR_DIR}/global-workflow
-          RUNTESTS="${PR_DIR}/RUNTESTS"
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
-          echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
-
-      - name: Generate test experiments
-        working-directory: ${{ env.BUILD_ROOT }}/dev/workflow
-        run: ./generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}"
 
       - name: Run and monitor PR test ${{ matrix.test }}
         working-directory: ${{ env.BUILD_ROOT }}
