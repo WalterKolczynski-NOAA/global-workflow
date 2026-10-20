@@ -40,7 +40,7 @@ jobs:
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
       # We need to check the code out in a specific location for use later,
-      #   so we have to check out the code manually instead of using the GH action 
+      #   so we have to check out the code manually instead of using the GH action
       - name: Prepare shared build root
         shell: bash
         run: |
@@ -64,7 +64,7 @@ jobs:
         id: list_tests
         working-directory: ${{ env.BUILD_ROOT }}
         shell: bash
-        # Get the list of tests that will be run so we can use it as a matrix 
+        # Get the list of tests that will be run so we can use it as a matrix
         run: |
           set -euo pipefail
           json="$( \
