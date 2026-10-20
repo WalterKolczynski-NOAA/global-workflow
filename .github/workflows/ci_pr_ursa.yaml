@@ -97,8 +97,8 @@ jobs:
           echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
 
       - name: Generate test experiments
-        working-directory: ${{ env.BUILD_ROOT }}
-        run: dev/workflow/generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}"
+        working-directory: ${{ env.BUILD_ROOT }}/dev/workflow
+        run: ./generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}"
 
       - name: Run and monitor PR test ${{ matrix.test }}
         working-directory: ${{ env.BUILD_ROOT }}
