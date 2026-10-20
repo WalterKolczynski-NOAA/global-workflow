@@ -14,16 +14,16 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PR_ROOT: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS
-  PR_DIR: ${{ env.PR_ROOT }}/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
-  BUILD_ROOT: ${{ env.PR_DIR }}/global-workflow
-  RUNTESTS: ${{ env.PR_DIR }}/RUNTESTS
+  PR_DIR: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
 
 jobs:
   build:
     name: Build Global Workflow
     runs-on: ursa
     timeout-minutes: 1440
+
+    env:
+      BUILD_ROOT: ${{ env.PR_DIR }}//global-workflow
 
     if: ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa') }}
 
@@ -71,6 +71,10 @@ jobs:
     needs: build
     runs-on: ursa
     timeout-minutes: 1440
+
+    env:
+      BUILD_ROOT: ${{ env.PR_DIR }}/global-workflow
+      RUNTESTS: ${{ env.PR_DIR }}/RUNTESTS
 
     strategy:
       fail-fast: true
