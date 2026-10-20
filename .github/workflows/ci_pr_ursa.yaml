@@ -14,32 +14,45 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RUNTESTS: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
+  PR_ROOT: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS
+  PR_DIR: ${{ env.PR_ROOT }}/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
+  BUILD_ROOT: ${{ env.PR_DIR }}/global-workflow
+  RUNTESTS: ${{ env.PR_DIR }}/RUNTESTS
 
 jobs:
-  # We need a list of tests that will be run to create the matrix
-  #   of tests to check later. Do this on a GitHub-hosted runner
-  #   using a non-recursive checkout.
-  gen_test_list:
-    name: Generate test list
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
+  build:
+    name: Build Global Workflow
+    runs-on: ursa
+    timeout-minutes: 1440
 
     if: ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa') }}
 
     outputs:
-      test_list: ${{ steps.test_list.outputs.test_list }}
+      test_list: ${{ steps.list_tests.outputs.test_list }}
     
     steps:
-      - name: Checkout PR Head
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 1
-          clean: true
-          submodules: false
+      - name: Prepare shared build root
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "${{ env.PR_DIR }}"
+          mkdir -p "${{ env.BUILD_ROOT }}"
+          git clone --depth 1 "${{ github.event.pull_request.head.repo.clone_url }}" "${{ env.BUILD_ROOT }}"
+          git -C "${{ env.BUILD_ROOT }}" fetch origin "${{ github.event.pull_request.head.ref }}"
+          git -C "${{ env.BUILD_ROOT }}" checkout FETCH_HEAD
+          git -C "${{ env.BUILD_ROOT }}" submodule update --init --recursive --jobs 8
+
+      - name: Build Global Workflow
+        working-directory: ${{ env.BUILD_ROOT }}
+        run: sorc/build_all.sh -cA epic all
+
+      - name: Link Global Workflow
+        working-directory: ${{ env.BUILD_ROOT }}
+        run: sorc/link_workflow.sh      
 
       - name: List tests
-        id: test_list
+        id: list_tests
+        working-directory: ${{ env.BUILD_ROOT }}
         shell: bash
         # Get the list of tests that will be run so we can use it as a matrix 
         run: |
@@ -51,33 +64,22 @@ jobs:
 
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
-  run_ci:
-    name: Run CI
-    needs: gen_test_list
+  run_tests:
+    name: Run tests
+    needs: build
     runs-on: ursa
     timeout-minutes: 1440
 
     strategy:
       fail-fast: true
       matrix:
-        test: ${{ fromJSON(needs.gen_test_list.outputs.test_list) }}
+        test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
-      - name: Checkout PR head
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 1
-          clean: true
-          submodules: recursive
-
-      - name: Build Global Workflow
-        run: sorc/build_all.sh -cA epic all
-
-      - name: Link Global Workflow
-        run: sorc/link_workflow.sh      
-
       - name: Generate test experiments
+        working-directory: ${{ env.BUILD_ROOT }}
         run: dev/workflow/generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}"
 
       - name: Run and monitor PR test ${{ matrix.test }}
+        working-directory: ${{ env.BUILD_ROOT }}
         run: dev/ci/scripts/run_check_ci.sh "${{ env.RUNTESTS }}" "${{ matrix.test }}"
