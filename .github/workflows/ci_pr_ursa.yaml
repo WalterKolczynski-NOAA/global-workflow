@@ -17,6 +17,9 @@ env:
   RUNTESTS: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
 
 jobs:
+  # We need a list of tests that will be run to create the matrix
+  #   of tests to check later. Do this on a GitHub-hosted runner
+  #   using a non-recursive checkout.
   gen_test_list:
     name: Generate test list
     runs-on: ubuntu-latest
@@ -48,8 +51,8 @@ jobs:
 
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
-  run_tests:
-    name: Run tests
+  run_ci:
+    name: Run CI
     needs: gen_test_list
     runs-on: ursa
     timeout-minutes: 1440
@@ -60,7 +63,7 @@ jobs:
         test: ${{ fromJSON(needs.gen_test_list.outputs.test_list) }}
 
     steps:
-      - name: Checkout PR Head
+      - name: Checkout PR head
         uses: actions/checkout@v5
         with:
           fetch-depth: 1
