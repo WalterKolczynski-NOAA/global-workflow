@@ -28,6 +28,9 @@ jobs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
     
     steps:
+      # We cannot use GH env to define new env in the GH action,
+      #   so if we want to have derived variables, we have to do
+      #   it in bash and add to the environment.
       - name: Define paths
         shell: bash
         run: |
