@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PR_DIR: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
+  PR_ROOT: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS
 
 jobs:
   build:
@@ -22,15 +22,20 @@ jobs:
     runs-on: ursa
     timeout-minutes: 1440
 
-    env:
-      BUILD_ROOT: ${{ env.PR_DIR }}//global-workflow
-
     if: ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa') }}
 
     outputs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
     
     steps:
+      - name: Define paths
+        shell: bash
+        run: |
+          PR_DIR=${{ env.PR_ROOT }}/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
+          BUILD_ROOT=${PR_DIR}/global-workflow
+          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+
       # We need to check the code out in a specific location for use later,
       #   so we have to check out the code manually instead of using the GH action 
       - name: Prepare shared build root
@@ -72,16 +77,22 @@ jobs:
     runs-on: ursa
     timeout-minutes: 1440
 
-    env:
-      BUILD_ROOT: ${{ env.PR_DIR }}/global-workflow
-      RUNTESTS: ${{ env.PR_DIR }}/RUNTESTS
-
     strategy:
       fail-fast: true
       matrix:
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
+      - name: Define paths
+        shell: bash
+        run: |
+          PR_DIR=${{ env.PR_ROOT }}/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
+          BUILD_ROOT=${PR_DIR}/global-workflow
+          RUNTESTS="${PR_DIR}/RUNTESTS"
+          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+          echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
+
       - name: Generate test experiments
         working-directory: ${{ env.BUILD_ROOT }}
         run: dev/workflow/generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}"
