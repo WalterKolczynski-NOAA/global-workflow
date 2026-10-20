@@ -14,11 +14,11 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PR_DIR: PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
+  RUNTESTS: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
 
 jobs:
-  prepare:
-    name: Prepare List of CI Tests for Ursa
+  gen_test_list:
+    name: Generate test list
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -26,18 +26,16 @@ jobs:
 
     outputs:
       test_list: ${{ steps.test_list.outputs.test_list }}
-
+    
     steps:
       - name: Checkout PR Head
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
           fetch-depth: 1
           clean: true
           submodules: false
 
-      - name: List Tests
+      - name: List tests
         id: test_list
         shell: bash
         # Get the list of tests that will be run so we can use it as a matrix 
@@ -51,23 +49,20 @@ jobs:
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
   run_tests:
-    name: Run PR Tests
-    needs: prepare
+    name: Run tests
+    needs: gen_test_list
     runs-on: ursa
     timeout-minutes: 1440
 
     strategy:
       fail-fast: true
       matrix:
-        test: ${{ fromJSON(needs.prepare.outputs.test_list) }}
+        test: ${{ fromJSON(needs.gen_test_list.outputs.test_list) }}
 
     steps:
       - name: Checkout PR Head
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          path: ${{ env.PR_DIR }}/global-workflow
           fetch-depth: 1
           clean: true
           submodules: recursive
@@ -76,10 +71,10 @@ jobs:
         run: sorc/build_all.sh -cA epic all
 
       - name: Link Global Workflow
-        run: sorc/link_workflow.sh
+        run: sorc/link_workflow.sh      
 
-      - name: Generate Test Experiments
-        run: dev/workflow/generate_workflows.sh -A epic -GECS -D "${{ env.PR_DIR }}/RUNTESTS"
+      - name: Generate test experiments
+        run: dev/workflow/generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}"
 
-      - name: Run and Monitor PR Test ${{ matrix.test }}
-        run: dev/ci/scripts/run_check_ci.sh "${{ env.PR_DIR }}/RUNTESTS" "${{ matrix.test }}"
+      - name: Run and monitor PR test ${{ matrix.test }}
+        run: dev/ci/scripts/run_check_ci.sh "${{ env.RUNTESTS }}" "${{ matrix.test }}"
