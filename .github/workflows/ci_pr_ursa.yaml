@@ -112,6 +112,7 @@ jobs:
 
   cleanup:
     name: Cleanup
+    needs: run_tests
     runs-on: ursa
     timeout-minutes: 1440
 
