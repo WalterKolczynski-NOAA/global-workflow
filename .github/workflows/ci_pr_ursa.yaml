@@ -17,7 +17,6 @@ concurrency:
 
 env:
 #   PR_ROOT: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}
-  
   PR_DIR: ${{ vars.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
   BUILD_ROOT: ${{ vars.PR_ROOT }}/${{ github.event.pull_request.head.sha }}/global-workflow
   RUNTESTS: ${{ vars.PR_ROOT }}/${{ github.event.pull_request.head.sha }}/RUNTESTS
