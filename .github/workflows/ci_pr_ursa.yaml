@@ -31,7 +31,7 @@ jobs:
       deployment: false
     timeout-minutes: 1440
 
-    if: github.repository == 'WalterKoczynski-NOAA/global-workflow'
+    if: github.repository == 'WalterKolczynski-NOAA/global-workflow'
 
     outputs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
