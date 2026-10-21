@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PR_ROOT: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS
+  PR_ROOT: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}
 
 jobs:
   build:
@@ -28,13 +28,20 @@ jobs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
     
     steps:
+      - name: Remove trigger label
+        shell: bash
+        uses: mondeja/remove-labels-gh-action@v2.0.0
+        with:
+          label: CI-Ursa
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       # We cannot use GH env to define new env in the GH action,
       #   so if we want to have derived variables, we have to do
       #   it in bash and add to the environment.
       - name: Define paths
         shell: bash
         run: |
-          PR_DIR=${{ env.PR_ROOT }}/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
+          PR_DIR=${{ env.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
           BUILD_ROOT=${PR_DIR}/global-workflow
           RUNTESTS="${PR_DIR}/RUNTESTS"
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
@@ -95,7 +102,7 @@ jobs:
       - name: Define paths
         shell: bash
         run: |
-          PR_DIR=${{ env.PR_ROOT }}/PR_${{ github.event.pull_request.number }}_${{ github.event.pull_request.head.sha }}
+          PR_DIR=${{ env.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
           BUILD_ROOT=${PR_DIR}/global-workflow
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
@@ -103,3 +110,14 @@ jobs:
       - name: Run and monitor PR test ${{ matrix.test }}
         working-directory: ${{ env.BUILD_ROOT }}
         run: dev/ci/scripts/run_check_ci.sh "${{ env.PR_DIR }}" "${{ matrix.test }}"
+
+  cleanup:
+    name: Cleanup
+    runs-on: ursa
+    timeout-minutes: 1440
+
+    steps:
+      - name: Cleanup up PR directory
+        shell: bash
+        run: |
+          rm -rf "${{ env.PR_ROOT }}"
