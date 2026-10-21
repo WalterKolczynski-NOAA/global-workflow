@@ -29,7 +29,6 @@ jobs:
     
     steps:
       - name: Remove trigger label
-        shell: bash
         uses: mondeja/remove-labels-gh-action@v2.0.0
         with:
           label: CI-Ursa
