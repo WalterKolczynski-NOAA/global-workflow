@@ -16,10 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-#   PR_ROOT: /scratch3/NAGAPE/epic/Walter.Kolczynski/noscrub/stmp/GH_RUNS/PR_${{ github.event.pull_request.number }}
-  PR_DIR: ${{ vars.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
-  BUILD_ROOT: ${{ vars.PR_ROOT }}/${{ github.event.pull_request.head.sha }}/global-workflow
-  RUNTESTS: ${{ vars.PR_ROOT }}/${{ github.event.pull_request.head.sha }}/RUNTESTS
+  PR_ROOT: ${{ vars.CI_RUN_ROOT }}/PR_${{ github.event.pull_request.number }}
 
 jobs:
   build:
@@ -46,15 +43,15 @@ jobs:
       # We cannot use GH env to define new env in the GH action,
       #   so if we want to have derived variables, we have to do
       #   it in bash and add to the environment.
-      # - name: Define paths
-      #   shell: bash
-      #   run: |
-      #     PR_DIR=${{ vars.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
-      #     BUILD_ROOT=${PR_DIR}/global-workflow
-      #     RUNTESTS="${PR_DIR}/RUNTESTS"
-      #     echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
-      #     echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
-      #     echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
+      - name: Define paths
+        shell: bash
+        run: |
+          PR_DIR=${{ env.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
+          BUILD_ROOT=${PR_DIR}/global-workflow
+          RUNTESTS="${PR_DIR}/RUNTESTS"
+          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+          echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
 
       # We need to check the code out in a specific location for use later,
       #   so we have to check out the code manually instead of using the GH action
@@ -107,13 +104,13 @@ jobs:
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
-      # - name: Define paths
-      #   shell: bash
-      #   run: |
-      #     PR_DIR=${{ env.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
-      #     BUILD_ROOT=${PR_DIR}/global-workflow
-      #     echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
-      #     echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+      - name: Define paths
+        shell: bash
+        run: |
+          PR_DIR=${{ env.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
+          BUILD_ROOT=${PR_DIR}/global-workflow
+          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
       - name: Run and monitor PR test ${{ matrix.test }}
         working-directory: ${{ env.BUILD_ROOT }}
@@ -129,4 +126,4 @@ jobs:
       - name: Cleanup up PR directory
         shell: bash
         run: |
-          rm -rf "${{ vars.PR_ROOT }}"
+          rm -rf "${{ env.PR_ROOT }}"
