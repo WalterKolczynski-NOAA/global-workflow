@@ -1,8 +1,8 @@
 name: PR CI Pipeline for Ursa
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -20,9 +20,12 @@ jobs:
   build:
     name: Build Global Workflow
     runs-on: ursa
+    environment:
+      name: self-hosted-approved
+      deployment: false
     timeout-minutes: 1440
 
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa') }}
+    # if: ${{ contains(github.event.pull_request.labels.*.name, 'CI-Ursa') }}
 
     outputs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
@@ -55,9 +58,9 @@ jobs:
           set -euo pipefail
           rm -rf "${{ env.PR_DIR }}"
           mkdir -p "${{ env.BUILD_ROOT }}"
-          git clone --depth 1 "${{ github.event.pull_request.head.repo.clone_url }}" "${{ env.BUILD_ROOT }}"
-          git -C "${{ env.BUILD_ROOT }}" fetch origin "${{ github.event.pull_request.head.ref }}"
-          git -C "${{ env.BUILD_ROOT }}" checkout FETCH_HEAD
+          git clone --depth 1 "${{ github.repository }}" "${{ env.BUILD_ROOT }}"
+          git -C "${{ env.BUILD_ROOT }}" fetch origin "${{ github.ref }}"
+          git -C "${{ env.BUILD_ROOT }}" checkout "${{ github.sha }}"
           git -C "${{ env.BUILD_ROOT }}" submodule update --init --recursive --jobs 8
 
       - name: Build Global Workflow
