@@ -25,7 +25,7 @@ jobs:
   build:
     name: Build Global Workflow
     runs-on: ursa
-    # Requires approval by specific users before running
+    # Requires approval by specific users before running 
     environment:
       name: self-hosted-approved
       deployment: false
