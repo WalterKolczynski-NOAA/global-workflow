@@ -18,12 +18,12 @@ permissions:
   pull-requests: write
   issues: write
 
-# Limit one running set of tests per machine/PR
+# Limit one running set of tests per machine/PR combo
 concurrency:
   group: ci_pr-${{ inputs.machine }}-${{ inputs.pr_number }}
   cancel-in-progress: true
 
-# CI_RUN_ROOT is set by the GH "deployment" environment
+# CI_RUN_ROOT is set by the GH "deployment" environment for the machine
 env:
   PR_ROOT: ${{ vars.CI_RUN_ROOT }}/PR_${{ inputs.pr_number }}
 
@@ -37,6 +37,7 @@ jobs:
       deployment: false
     timeout-minutes: 5
 
+    # Restricts to only run on master repository
     if: github.repository == 'WalterKolczynski-NOAA/global-workflow'
 
     steps:
