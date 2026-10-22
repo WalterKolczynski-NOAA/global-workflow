@@ -13,6 +13,20 @@ permissions:
   issues: read
 
 jobs:
+  # List all the possible machines to run CI on
+  # Two GH environments will need to be created in the repo
+  #   for each machine:
+  #   - ${machine}
+  #     Must contain an environment variable CI_RUN_ROOT
+  #       containing the path where the CI should run
+  #   - self-hosted-${machine}
+  #     Should be protected by having a Required reviewers
+  #       list. This is the list of people who can approve
+  #       the CI to run on that machine's self-hosted runners
+  #
+  # Each machine has a separate approval, allowing some
+  #   machine to be skipped if desired.
+  # 
   ursa:
     uses: $/.github/workflows/ci_pr.yaml
     with:
