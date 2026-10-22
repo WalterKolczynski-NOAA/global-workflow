@@ -18,6 +18,7 @@ permissions:
   pull-requests: write
   issues: write
 
+# Limit one running set of tests per machine/PR
 concurrency:
   group: ci_pr-${{ inputs.machine }}-${{ inputs.pr_number }}
   cancel-in-progress: true
