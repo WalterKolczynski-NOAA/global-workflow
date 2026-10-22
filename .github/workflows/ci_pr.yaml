@@ -109,7 +109,7 @@ jobs:
 
       - name: Generate test experiments
         working-directory: ${{ env.BUILD_ROOT }}/dev/workflow
-        run: ./generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}" -t "_${{ inputs.pr_number }}"
+        run: ./generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}" -t "${{ inputs.pr_number }}"
 
   run_tests:
     name: Run tests
