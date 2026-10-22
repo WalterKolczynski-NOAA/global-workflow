@@ -26,16 +26,13 @@ jobs:
   #
   # Each machine has a separate approval, allowing some
   #   machines to be skipped if desired.
-  # 
-  ursa:
-    uses: $/.github/workflows/ci_pr.yaml
+  #
+  ci_pr_pipeline:
+    strategy:
+      matrix:
+        machine: [ursa, hercules]
+    uses: ./.github/workflows/ci_pr.yaml
     with:
-      machine: ursa
-      pr_number: ${{ github.event.pull_request.number }}
-      pr_head_sha: ${{ github.event.pull_request.head.sha }}
-  hercules:    
-    uses: $/.github/workflows/ci_pr.yaml
-    with:
-      machine: hercules
+      machine: ${{ matrix.machine }}
       pr_number: ${{ github.event.pull_request.number }}
       pr_head_sha: ${{ github.event.pull_request.head.sha }}
