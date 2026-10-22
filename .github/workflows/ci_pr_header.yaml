@@ -19,7 +19,7 @@ jobs:
     outputs:
       short_sha: ${{ github.event.pull_request.head.sha }}
     steps:
-      - id short_sha
+      - id: short_sha
         shell: bash
         env:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
