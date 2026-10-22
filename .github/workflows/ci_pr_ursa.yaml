@@ -35,7 +35,7 @@ jobs:
         id: set_machines
         shell: bash
         run: |
-          echo 'machines=${{ vars.machines }}'' >> "$GITHUB_OUTPUT"
+          echo 'machines=${{ vars.machines }}' >> "$GITHUB_OUTPUT"
 
   gate:
     # Requires approval by specific users before running
