@@ -9,7 +9,7 @@ on:
       pr_number:
         required: true
         type: string
-      pr_head_sha:
+      run_id:
         required: true
         type: string
 
@@ -65,7 +65,7 @@ jobs:
       - name: Define paths
         shell: bash
         run: |
-          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.pr_head_sha }}
+          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
           BUILD_ROOT=${PR_DIR}/global-workflow
           RUNTESTS="${PR_DIR}/RUNTESTS"
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
@@ -129,14 +129,14 @@ jobs:
       - name: Define paths
         shell: bash
         run: |
-          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.pr_head_sha }}
+          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
           BUILD_ROOT=${PR_DIR}/global-workflow
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
       - name: Run and monitor PR test ${{ matrix.test }}
         working-directory: ${{ env.BUILD_ROOT }}
-        run: dev/ci/scripts/run_check_ci.sh "${{ env.PR_DIR }}" "${{ matrix.test }}"
+        run: dev/ci/scripts/run_check_ci.sh "${{ env.PR_DIR }}" "${{ matrix.test }}_${{ inputs.pr_number }}"
 
   cleanup:
     name: Cleanup
