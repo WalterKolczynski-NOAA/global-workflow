@@ -36,12 +36,6 @@ jobs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
     
     steps:
-      - name: Remove trigger label
-        uses: mondeja/remove-labels-gh-action@v2.0.0
-        with:
-          labels: CI-Ursa
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       # We cannot use GH env to define new env in the GH action,
       #   so if we want to have derived variables, we have to do
       #   it in bash and add to the environment.
