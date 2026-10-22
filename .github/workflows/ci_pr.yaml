@@ -1,11 +1,17 @@
 name: PR CI Pipeline
 
 on:
-  # Use request target to prevent running GH actions modified by PR 
-  pull_request_target:
-    types: [opened, synchronize, reopened]
-    paths-ignore:
-      - 'docs/**'
+  workflow_call:
+    inputs:
+      machine:
+        required: true
+        type: string
+      pr_number:
+        required: true
+        type: string
+      pr_head_sha:
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -13,43 +19,22 @@ permissions:
   issues: write
 
 concurrency:
-  group: ci_pr-${{ github.event.pull_request.number }}
+  group: ci_pr-${{ inputs.machine }}-${{ inputs.pr_number }}
   cancel-in-progress: true
 
 # CI_RUN_ROOT is set by the GH "deployment" environment
 env:
-  PR_ROOT: ${{ vars.CI_RUN_ROOT }}/PR_${{ github.event.pull_request.number }}
+  PR_ROOT: ${{ vars.CI_RUN_ROOT }}/PR_${{ inputs.pr_number }}
 
 jobs:
-  define-machines:
-    name: Define machines
-    runs-on: ubuntu-latest
-    environment:
-      name: define-machines
-      deployment: false
-    outputs:
-      machines: ${{ steps.set_machines.outputs.machines }}
-    
-    steps:
-      - name: Set machines
-        id: set_machines
-        shell: bash
-        run: |
-          echo 'machines=${{ vars.machines }}' >> "$GITHUB_OUTPUT"
-
   gate:
     # Requires approval by specific users before running
     name: Self-Hosted Gate
-    needs: define-machines
     runs-on: ubuntu-latest
     environment:
       name: self-hosted-approved
       deployment: false
     timeout-minutes: 5
-
-    strategy:
-      matrix:
-        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
 
     if: github.repository == 'WalterKolczynski-NOAA/global-workflow'
 
@@ -57,20 +42,16 @@ jobs:
       - name: Approval
         shell: bash
         run: |
-          echo "Workflow approved for ${{ matrix.machine }}, proceeding"
+          echo "Workflow approved for ${{ inputs.machine }}, proceeding"
 
   build:
     name: Build Global Workflow
-    needs: [define-machines, gate]
-    runs-on: ${{ matrix.machine }}
+    needs: gate
+    runs-on: ${{ inputs.machine }}
     environment:
-      name: ${{ matrix.machine }}
+      name: ${{ inputs.machine }}
       deployment: false
     timeout-minutes: 1440
-
-    strategy:
-      matrix:
-        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
 
     outputs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
@@ -82,7 +63,7 @@ jobs:
       - name: Define paths
         shell: bash
         run: |
-          PR_DIR=${{ env.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
+          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.pr_head_sha }}
           BUILD_ROOT=${PR_DIR}/global-workflow
           RUNTESTS="${PR_DIR}/RUNTESTS"
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
@@ -98,7 +79,7 @@ jobs:
           rm -rf "${{ env.PR_DIR }}"
           mkdir -p "${{ env.BUILD_ROOT }}"
           git clone --depth 1 "https://github.com/${{ github.repository }}.git" "${{ env.BUILD_ROOT }}"
-          git -C "${{ env.BUILD_ROOT }}" fetch origin "pull/${{ github.event.pull_request.number }}/merge"
+          git -C "${{ env.BUILD_ROOT }}" fetch origin "pull/${{ inputs.pr_number }}/merge"
           git -C "${{ env.BUILD_ROOT }}" checkout FETCH_HEAD
           git -C "${{ env.BUILD_ROOT }}" submodule update --init --recursive --jobs 8
 
@@ -118,7 +99,7 @@ jobs:
         run: |
           set -euo pipefail
           json="$( \
-            MACHINE_ID='${{ matrix.machine }}' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
+            MACHINE_ID='${{ inputs.machine }}' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
             | tail -n +9 \
             | jq -RMn --indent 0 '[inputs | select(length > 0)]')"
 
@@ -126,28 +107,27 @@ jobs:
 
       - name: Generate test experiments
         working-directory: ${{ env.BUILD_ROOT }}/dev/workflow
-        run: ./generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}"
+        run: ./generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}" -t "_${{ inputs.pr_number }}"
 
   run_tests:
     name: Run tests
-    needs: [define-machines, build]
-    runs-on: ${{ matrix.machine }}
+    needs: build
+    runs-on: ${{ inputs.machine }}
     timeout-minutes: 1440
     environment:
-      name: ${{ matrix.machine }}
+      name: ${{ inputs.machine }}
       deployment: false
     
     strategy:
       fail-fast: true
       matrix:
-        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
       - name: Define paths
         shell: bash
         run: |
-          PR_DIR=${{ env.PR_ROOT }}/${{ github.event.pull_request.head.sha }}
+          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.pr_head_sha }}
           BUILD_ROOT=${PR_DIR}/global-workflow
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
@@ -158,17 +138,12 @@ jobs:
 
   cleanup:
     name: Cleanup
-    needs: [define-machines, run_tests]
-    runs-on: ${{ matrix.machine }}
+    needs: run_tests
+    runs-on: ${{ inputs.machine }}
     timeout-minutes: 1440
     environment:
-      name: ${{ matrix.machine }}
+      name: ${{ inputs.machine }}
       deployment: false
-
-    strategy:
-      fail-fast: true
-      matrix:
-        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
 
     steps:
       - name: Cleanup up PR directory
