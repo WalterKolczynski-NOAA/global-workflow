@@ -19,28 +19,12 @@ concurrency:
 # CI_RUN_ROOT is set by the GH "deployment" environment 
 env:
   PR_ROOT: ${{ vars.CI_RUN_ROOT }}/PR_${{ github.event.pull_request.number }}
+  machines: ["ursa", "hercules"]
 
 jobs:
-  define-machines:
-    name: Define machines
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    outputs:
-      machines: ${{ steps.define.outputs.machines }}
-
-    steps:
-      - name: Define machines
-        id: define
-        shell: bash
-        run: |
-          echo "Valid machines: ${{ vars.machines }}"
-          echo "machines=${{ vars.machines }}" >> "$GITHUB_OUTPUT"
-
   gate:
     # Requires approval by specific users before running
     name: Self-Hosted Gate
-    needs: define-machines
     runs-on: ubuntu-latest
     environment:
       name: self-hosted-approved
@@ -49,7 +33,7 @@ jobs:
 
     strategy:
       matrix:
-        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
+        machine: ${{ fromJSON(env.machines) }}
 
     if: github.repository == 'WalterKolczynski-NOAA/global-workflow'
 
@@ -57,11 +41,11 @@ jobs:
       - name: Approval
         shell: bash
         run: |
-          echo "Workflow approved, proceeding"
+          echo "Workflow approved for ${{ matrix.machine }}, proceeding"
 
   build:
     name: Build Global Workflow
-    needs: [define-machines, gate]
+    needs: gate
     runs-on: ${{ matrix.machine }}
     environment:
       name: ${{ matrix.machine }}
@@ -70,7 +54,7 @@ jobs:
 
     strategy:
       matrix:
-        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
+        machine: ${{ fromJSON(env.machines) }}
 
     outputs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
@@ -130,7 +114,7 @@ jobs:
 
   run_tests:
     name: Run tests
-    needs: [define-machines, build]
+    needs: build
     runs-on: ${{ matrix.machine }}
     timeout-minutes: 1440
     environment:
@@ -140,7 +124,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
+        machine: ${{ fromJSON(env.machines) }}
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
@@ -158,7 +142,7 @@ jobs:
 
   cleanup:
     name: Cleanup
-    needs: [define-machines, run_tests]
+    needs: run_tests
     runs-on: ${{ matrix.machine }}
     timeout-minutes: 1440
     environment:
@@ -168,7 +152,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
+        machine: ${{ fromJSON(env.machines) }}
 
     steps:
       - name: Cleanup up PR directory
