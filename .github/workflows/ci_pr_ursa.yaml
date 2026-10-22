@@ -21,16 +21,31 @@ env:
   PR_ROOT: ${{ vars.CI_RUN_ROOT }}/PR_${{ github.event.pull_request.number }}
 
 jobs:
-  build:
-    name: Build Global Workflow
-    runs-on: ursa
+  gate:
     # Requires approval by specific users before running
+    name: Self-Hosted Gate
+    runs-on: ubuntu-latest
     environment:
       name: self-hosted-approved
       deployment: false
-    timeout-minutes: 1440
+    timeout-minutes: 5
 
     if: github.repository == 'WalterKolczynski-NOAA/global-workflow'
+
+    steps:
+      - Approval
+        shell: bash
+        run: |
+          echo "Workflow approved, proceeding"
+
+  build:
+    name: Build Global Workflow
+    needs: gate
+    runs-on: ursa
+    environment:
+      name: ursa
+      deployment: false
+    timeout-minutes: 1440
 
     outputs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
@@ -94,7 +109,7 @@ jobs:
     runs-on: ursa
     timeout-minutes: 1440
     environment:
-      name: self-hosted-approved
+      name: ursa
       deployment: false
     
     strategy:
@@ -121,7 +136,7 @@ jobs:
     runs-on: ursa
     timeout-minutes: 1440
     environment:
-      name: self-hosted-approved
+      name: ursa
       deployment: false
 
     steps:
