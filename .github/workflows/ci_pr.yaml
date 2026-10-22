@@ -31,9 +31,9 @@ jobs:
   gate:
     # Requires approval by specific users before running
     name: Self-Hosted Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     environment:
-      name: approve-${{ inputs.machine }}
+      name: self-hosted-${{ inputs.machine }}
       deployment: false
     timeout-minutes: 5
 
