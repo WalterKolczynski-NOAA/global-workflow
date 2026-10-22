@@ -32,9 +32,9 @@ jobs:
     runs-on: ubuntu-slim
     needs: get_short_sha
     steps:
-      shell: bash
-      run: |
-        echo "Short sha: ${{ needs.get_short_sha.outputs.short_sha }}"
+      - shell: bash
+        run: |
+          echo "Short sha: ${{ needs.get_short_sha.outputs.short_sha }}"
 
   # List all the possible machines to run CI on
   # Two GH environments will need to be created in the repo
