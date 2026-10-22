@@ -32,7 +32,7 @@ jobs:
     name: Self-Hosted Gate
     runs-on: ubuntu-latest
     environment:
-      name: self-hosted-approved
+      name: ${{ inputs.machine }}
       deployment: false
     timeout-minutes: 5
 
