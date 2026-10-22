@@ -26,6 +26,7 @@ jobs:
         run: |
           short_sha="${PR_HEAD_SHA::7}"
           echo "Short sha: ${short_sha}"
+          echo "short_sha=${short_sha}"
           echo "short_sha=${short_sha}" >> "$GITHUB_OUTPUT"
 
   wtf:
