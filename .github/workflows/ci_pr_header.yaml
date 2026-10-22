@@ -24,8 +24,9 @@ jobs:
         env:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          echo "Shortened sha: ${PR_HEAD_SHA::7}"
-          echo "short_sha=${PR_HEAD_SHA::7}" >> "$GITHUB_OUTPUT"
+          short_sha="${PR_HEAD_SHA::7}"
+          echo "Short sha: ${short_sha}"
+          echo "short_sha=${short_sha}" >> "$GITHUB_OUTPUT"
 
   # List all the possible machines to run CI on
   # Two GH environments will need to be created in the repo
