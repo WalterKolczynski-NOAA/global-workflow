@@ -19,12 +19,28 @@ concurrency:
 # CI_RUN_ROOT is set by the GH "deployment" environment
 env:
   PR_ROOT: ${{ vars.CI_RUN_ROOT }}/PR_${{ github.event.pull_request.number }}
-  machines: ["ursa", "hercules"]
 
 jobs:
+  define-machines:
+    name: Define machines
+    runs-on: ubuntu-latest
+    environment:
+      name: define-machines
+      deployment: false
+    outputs:
+      machines: ${{ steps.set_machines.outputs.machines }}
+    
+    steps:
+      - name: Set machines
+        id: set_machines
+        shell: bash
+        run: |
+          echo "machines=${{ vars.machines }}" >> "$GITHUB_OUTPUT"
+
   gate:
     # Requires approval by specific users before running
     name: Self-Hosted Gate
+    needs: define-machines
     runs-on: ubuntu-latest
     environment:
       name: self-hosted-approved
@@ -33,7 +49,7 @@ jobs:
 
     strategy:
       matrix:
-        machine: ${{ fromJSON(env.machines) }}
+        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
 
     if: github.repository == 'WalterKolczynski-NOAA/global-workflow'
 
@@ -45,7 +61,7 @@ jobs:
 
   build:
     name: Build Global Workflow
-    needs: gate
+    needs: [define-machines, gate]
     runs-on: ${{ matrix.machine }}
     environment:
       name: ${{ matrix.machine }}
@@ -54,7 +70,7 @@ jobs:
 
     strategy:
       matrix:
-        machine: ${{ fromJSON(env.machines) }}
+        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
 
     outputs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
@@ -114,7 +130,7 @@ jobs:
 
   run_tests:
     name: Run tests
-    needs: build
+    needs: [define-machines, build]
     runs-on: ${{ matrix.machine }}
     timeout-minutes: 1440
     environment:
@@ -124,7 +140,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        machine: ${{ fromJSON(env.machines) }}
+        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
@@ -142,7 +158,7 @@ jobs:
 
   cleanup:
     name: Cleanup
-    needs: run_tests
+    needs: [define-machines, run_tests]
     runs-on: ${{ matrix.machine }}
     timeout-minutes: 1440
     environment:
@@ -152,7 +168,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        machine: ${{ fromJSON(env.machines) }}
+        machine: ${{ fromJSON(needs.define-machines.outputs.machines) }}
 
     steps:
       - name: Cleanup up PR directory
