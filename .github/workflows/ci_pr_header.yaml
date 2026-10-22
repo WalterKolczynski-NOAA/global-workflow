@@ -25,7 +25,7 @@ jobs:
   #       the CI to run on that machine's self-hosted runners
   #
   # Each machine has a separate approval, allowing some
-  #   machine to be skipped if desired.
+  #   machines to be skipped if desired.
   # 
   ursa:
     uses: $/.github/workflows/ci_pr.yaml
