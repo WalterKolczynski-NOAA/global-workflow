@@ -98,7 +98,10 @@ jobs:
     needs: build
     runs-on: ursa
     timeout-minutes: 1440
-
+    environment:
+      name: self-hosted-approved
+      deployment: false
+    
     strategy:
       fail-fast: true
       matrix:
@@ -122,6 +125,9 @@ jobs:
     needs: run_tests
     runs-on: ursa
     timeout-minutes: 1440
+    environment:
+      name: self-hosted-approved
+      deployment: false
 
     steps:
       - name: Cleanup up PR directory
