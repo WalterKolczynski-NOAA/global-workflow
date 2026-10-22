@@ -15,7 +15,7 @@ permissions:
 jobs:
   # Get a shortened version of the sha to reduce path lengths
   get_short_sha:
-    runs-on: ubuntu-lite
+    runs-on: ubuntu-slim
     outputs:
       short_sha: ${{ github.event.pull_request.head.sha }}
     steps:
