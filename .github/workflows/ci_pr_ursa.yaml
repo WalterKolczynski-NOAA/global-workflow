@@ -16,7 +16,7 @@ concurrency:
   group: ci_pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-# CI_RUN_ROOT is set by the GH "deployment" environment
+# CI_RUN_ROOT is set by the GH "deployment" environment 
 env:
   PR_ROOT: ${{ vars.CI_RUN_ROOT }}/PR_${{ github.event.pull_request.number }}
 
