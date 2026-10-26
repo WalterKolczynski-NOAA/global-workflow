@@ -67,21 +67,11 @@ cd "${location}"
 for ((runner_num = num_existing - 1; runner_num >= new_total; runner_num--)); do
     runner_num_padded=$(printf '%03d' "${runner_num}")
     dir_name="${machine}_${runner_num_padded}"
+    ./stop_runners.sh "${dir_name}"
     cd "${dir_name}"
-    # TODO: Make sure runner is stopped
     ./config.sh remove --token "${token}"
     cd ..
     rm -Rf "${dir_name}"
 done
-
-# TODO: Change to runner management system
-rm -f run_all.sh
-if [[ "${new_total}" -eq 0 ]]; then
-    for ((runner_num = 0; runner_num < new_total; runner_num++)); do
-        runner_num_padded=$(printf '%03d' "${runner_num}")
-        echo "${machine}_${runner_num_padded}/run.sh" >> run_all.sh
-    done
-    chmod 744 run_all.sh
-fi
 
 echo "${num_destroy} runners have been destoyed"
