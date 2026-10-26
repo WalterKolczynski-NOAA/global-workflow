@@ -91,7 +91,7 @@ jobs:
 
       - name: Link Global Workflow
         working-directory: ${{ env.BUILD_ROOT }}
-        run: sorc/link_workflow.sh      
+        run: sorc/link_workflow.sh
 
       - name: List tests
         id: list_tests
