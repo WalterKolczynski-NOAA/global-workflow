@@ -10,14 +10,13 @@ runner_tarball=$(basename "${runner_source_url}")
 runner_tarball_hash='70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613'
 
 source "${HOMEglobal}/ush/detect_machine.sh"
-machine="${MACHINE_ID}"
-echo "${machine} detected. Will create runners for ${machine}."
+echo "${MACHINE_ID} detected. Will create runners for ${MACHINE_ID}."
 
 echo "Where would you like to create more GitHub runners?"
 read -r location
 echo
 
-num_existing=$(find "${location}" -maxdepth 1 -type d -regextype posix-extended -regex "./${machine}_[0-9]{3}" -printf '.' | wc -c)
+num_existing=$(find "${location}" -maxdepth 1 -type d -regextype posix-extended -regex "${location}/${MACHINE_ID}_[0-9]{3}" -printf '.' | wc -c)
 echo "${num_existing} existing runners found in ${location}"
 
 num_new=""
@@ -50,6 +49,7 @@ while ! ${valid_repo}; do
     else
         echo "Could not connect to ${repo}, is it correct?"
     fi
+    rm "${repo}"
 done
 
 echo "Please enter GitHub token for creating new runners"
@@ -75,24 +75,24 @@ cd ..
 
 for ((runner_num = num_existing; runner_num < new_total; runner_num++)); do
     runner_num_padded=$(printf '%03d' "${runner_num}")
-    dir_name="${machine}_${runner_num_padded}"
+    dir_name="${MACHINE_ID}_${runner_num_padded}"
     echo "Copying clean runner directory to ${dir_name}"
     rsync -a --stats .clean/ "${dir_name}"
     cd "${dir_name}"
 
     echo "Configuring GitHub runner ${dir_name}"
-    ./config.sh --unattended --url "${repo}" --token "${token}" --name "${machine}_${runner_num_padded}" --labels "${machine}"
+    ./config.sh --unattended --url "${repo}" --token "${token}" --name "${MACHINE_ID}_${runner_num_padded}" --labels "${MACHINE_ID}"
 
     cd ..
 done
 
-# TODO: Change to runner management system
-rm run_all.sh
-for ((runner_num = 0; runner_num < new_total; runner_num++)); do
-    runner_num_padded=$(printf '%03d' "${runner_num}")
-    echo "${machine}_${runner_num_padded}/run.sh" >> run_all.sh
+for script in create_gh_runners.sh destroy_gh_runners.sh runner_watchdog.sh stop_runners.sh start_runners.sh; do
+    cp "${script_dir}/${script}" ./
+    chmod "./${script}"
 done
-chmod 744 run_all.sh
+
+./runner_watchdog.sh
 
 rm -Rf .clean
 echo "Your new runners have been created"
+echo "Add ${location}/runner_watchdog.sh to your crontab to keep your runners running"
