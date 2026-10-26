@@ -1,4 +1,4 @@
-name: PR CI Header
+name: PR CI Preface
 
 on:
   # Use request target to prevent running GH actions modified by PR 
