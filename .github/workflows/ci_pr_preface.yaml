@@ -1,7 +1,7 @@
-name: PR CI Header
+name: PR CI Preface
 
 on:
-  # Use request target to prevent running GH actions modified by PR
+  # Use request target to prevent running GH actions modified by PR 
   pull_request_target:
     types: [opened, synchronize, reopened]
     paths-ignore:
