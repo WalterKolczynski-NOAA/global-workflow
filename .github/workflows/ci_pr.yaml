@@ -59,9 +59,9 @@ jobs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
     
     steps:
-      # We cannot use GH env to define new env in the GH action,
-      #   so if we want to have derived variables, we have to do
-      #   it in bash and add to the environment.
+      # We cannot use GH env to define new env in the GH action, so if we want
+      #   to have derived variables, we have to do it in bash and add to the
+      #   environment.
       - name: Define paths
         shell: bash
         run: |
@@ -72,8 +72,8 @@ jobs:
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
           echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
 
-      # We need to check the code out in a specific location for use later,
-      #   so we have to check out the code manually instead of using the GH action
+      # We need to check the code out in a specific location for use later, so
+      #   we have to check out the code manually instead of using the GH action
       - name: Checkout merge commit
         shell: bash
         run: |
