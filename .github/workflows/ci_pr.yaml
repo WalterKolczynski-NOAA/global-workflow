@@ -144,6 +144,8 @@ jobs:
         shell: bash
         run: |
           cd "${BUILD_ROOT}"
+          # Sleep a random number of seconds between 0-120 to avoid overloading runners
+          sleep $((RANDOM % 121)) && echo "done"
           dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}"
 
   cleanup:
