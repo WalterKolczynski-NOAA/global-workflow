@@ -86,11 +86,13 @@ jobs:
           git -C "${BUILD_ROOT}" submodule update --init --recursive --jobs 8
 
       - name: Build Global Workflow
+        shell: bash
         run: |
           cd "${BUILD_ROOT}"
           sorc/build_all.sh -cA epic all
 
       - name: Link Global Workflow
+        shell: bash
         run: |
           cd "${BUILD_ROOT}"
           sorc/link_workflow.sh
@@ -110,8 +112,10 @@ jobs:
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
       - name: Generate test experiments
-        working-directory: ${BUILD_ROOT}/dev/workflow
-        run: ./generate_workflows.sh -A epic -GECS -D "${RUNTESTS}" -t "${{ inputs.pr_number }}"
+        shell: bash
+        run: |
+          cd "${BUILD_ROOT}/dev/workflow"
+          ./generate_workflows.sh -A epic -GECS -D "${RUNTESTS}" -t "${{ inputs.pr_number }}"
 
   run_tests:
     name: Run tests
@@ -137,6 +141,7 @@ jobs:
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
       - name: Run and monitor PR test ${{ matrix.test }}
+        shell: bash
         run: |
           cd "${BUILD_ROOT}"
           dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}"
