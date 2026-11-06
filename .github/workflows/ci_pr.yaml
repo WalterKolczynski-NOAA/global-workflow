@@ -103,7 +103,7 @@ jobs:
           json="$( \
             MACHINE_ID='${{ inputs.machine }}' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
             | tail -n +9 \
-            | jq -RMn --indent 0 '[inputs | select(length > 0)]')"
+            | python3 -c 'import json, sys; rows=[line.strip() for line in sys.stdin if line.strip()]; print(json.dumps(rows))')"
 
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
