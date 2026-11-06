@@ -86,20 +86,22 @@ jobs:
           git -C "${BUILD_ROOT}" submodule update --init --recursive --jobs 8
 
       - name: Build Global Workflow
-        working-directory: ${BUILD_ROOT}
-        run: sorc/build_all.sh -cA epic all
+        run: |
+          cd "${BUILD_ROOT}"
+          sorc/build_all.sh -cA epic all
 
       - name: Link Global Workflow
-        working-directory: ${BUILD_ROOT}
-        run: sorc/link_workflow.sh
+        run: |
+          cd "${BUILD_ROOT}"
+          sorc/link_workflow.sh
 
       - name: List tests
         id: list_tests
-        working-directory: ${BUILD_ROOT}
         shell: bash
         # Get the list of tests that will be run so we can use it as a matrix
         run: |
           set -euo pipefail
+          cd "${BUILD_ROOT}"
           json="$( \
             MACHINE_ID='${{ inputs.machine }}' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
             | tail -n +9 \
@@ -135,8 +137,9 @@ jobs:
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
       - name: Run and monitor PR test ${{ matrix.test }}
-        working-directory: ${BUILD_ROOT}
-        run: dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}"
+        run: |
+          cd "${BUILD_ROOT}"
+          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}"
 
   cleanup:
     name: Cleanup
