@@ -57,7 +57,7 @@ jobs:
 
     outputs:
       test_list: ${{ steps.list_tests.outputs.test_list }}
-    
+
     steps:
       # We cannot use GH env to define new env in the GH action, so if we want
       #   to have derived variables, we have to do it in bash and add to the
@@ -125,7 +125,7 @@ jobs:
     environment:
       name: ${{ inputs.machine }}
       deployment: false
-    
+
     strategy:
       fail-fast: true
       matrix:
@@ -145,8 +145,8 @@ jobs:
         run: |
           cd "${BUILD_ROOT}"
           # Sleep a random number of seconds between 0-120 to avoid overloading runners
-          sleep $((RANDOM % 121)) && echo "done"
-          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}"
+          # sleep $((RANDOM % 121)) && echo "done"
+          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
 
   cleanup:
     name: Cleanup
