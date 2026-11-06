@@ -78,24 +78,24 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf "${{ env.PR_DIR }}"
-          mkdir -p "${{ env.BUILD_ROOT }}"
-          git clone --depth 1 "https://github.com/${{ github.repository }}.git" "${{ env.BUILD_ROOT }}"
-          git -C "${{ env.BUILD_ROOT }}" fetch origin "pull/${{ inputs.pr_number }}/merge"
-          git -C "${{ env.BUILD_ROOT }}" checkout FETCH_HEAD
-          git -C "${{ env.BUILD_ROOT }}" submodule update --init --recursive --jobs 8
+          rm -rf "${PR_DIR}"
+          mkdir -p "${BUILD_ROOT}"
+          git clone --depth 1 "https://github.com/${{ github.repository }}.git" "${BUILD_ROOT}"
+          git -C "${BUILD_ROOT}" fetch origin "pull/${{ inputs.pr_number }}/merge"
+          git -C "${BUILD_ROOT}" checkout FETCH_HEAD
+          git -C "${BUILD_ROOT}" submodule update --init --recursive --jobs 8
 
       - name: Build Global Workflow
-        working-directory: ${{ env.BUILD_ROOT }}
+        working-directory: ${BUILD_ROOT}
         run: sorc/build_all.sh -cA epic all
 
       - name: Link Global Workflow
-        working-directory: ${{ env.BUILD_ROOT }}
+        working-directory: ${BUILD_ROOT}
         run: sorc/link_workflow.sh
 
       - name: List tests
         id: list_tests
-        working-directory: ${{ env.BUILD_ROOT }}
+        working-directory: ${BUILD_ROOT}
         shell: bash
         # Get the list of tests that will be run so we can use it as a matrix
         run: |
@@ -108,8 +108,8 @@ jobs:
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
       - name: Generate test experiments
-        working-directory: ${{ env.BUILD_ROOT }}/dev/workflow
-        run: ./generate_workflows.sh -A epic -GECS -D "${{ env.RUNTESTS }}" -t "${{ inputs.pr_number }}"
+        working-directory: ${BUILD_ROOT}/dev/workflow
+        run: ./generate_workflows.sh -A epic -GECS -D "${RUNTESTS}" -t "${{ inputs.pr_number }}"
 
   run_tests:
     name: Run tests
@@ -135,8 +135,8 @@ jobs:
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
       - name: Run and monitor PR test ${{ matrix.test }}
-        working-directory: ${{ env.BUILD_ROOT }}
-        run: dev/ci/scripts/run_check_ci.sh "${{ env.PR_DIR }}" "${{ matrix.test }}_${{ inputs.pr_number }}"
+        working-directory: ${BUILD_ROOT}
+        run: dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}"
 
   cleanup:
     name: Cleanup
