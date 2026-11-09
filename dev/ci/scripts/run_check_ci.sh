@@ -51,6 +51,10 @@ fi
 
 # Launch experiment
 echo "Launch experiment with Rocoto."
+while [[ $(pgrep -fc rocotorun) -gt 0 ]]; do
+    echo "Another rocotorun process is running, waiting 5 seconds to avoid overload."
+    sleep 5
+done
 rocotorun -v "${ROCOTO_VERBOSE:-0}" -w "${xml}" -d "${db}"
 sleep 10
 if [[ ! -f "${db}" ]]; then
@@ -62,11 +66,6 @@ fi
 rc=99
 set +e
 while true; do
-
-    while [[ $(pgrep -fc rocotorun) -gt 0 ]]; do
-        echo "Another rocotorun process is running, waiting 5 seconds to avoid overload."
-        sleep 5
-    done
 
     echo "Run rocotorun."
     rocotorun -v "${ROCOTO_VERBOSE:-0}" -w "${xml}" -d "${db}"
