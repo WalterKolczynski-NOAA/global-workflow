@@ -132,21 +132,21 @@ jobs:
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
-      - name: Define paths
-        shell: bash
-        run: |
-          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
-          BUILD_ROOT=${PR_DIR}/global-workflow
-          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
-          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+      # - name: Define paths
+      #   shell: bash
+      #   run: |
+      #     PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
+      #     BUILD_ROOT=${PR_DIR}/global-workflow
+      #     echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
+      #     echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
       - name: Run and monitor PR test ${{ matrix.test }}
         shell: bash
         run: |
-          cd "${BUILD_ROOT}"
+          cd "${{ env.PR_ROOT }}/${{ inputs.run_id }}/global-workflow"
           # Sleep a random number of seconds between 0-120 to avoid overloading runners
-          # sleep $((RANDOM % 121)) && echo "done"
-          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
+          # sleep $((RANDOM % 121)) && echo "starting..."
+          dev/ci/scripts/run_check_ci.sh "${{ env.PR_ROOT }}/${{ inputs.run_id }}" "${{ matrix.test }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
 
   cleanup:
     name: Cleanup
