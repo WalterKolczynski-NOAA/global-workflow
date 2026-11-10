@@ -162,7 +162,7 @@ jobs:
         shell: bash
         run: |
           cd "${BUILD_ROOT}/dev/workflow"
-          yes n | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -D "${RUNTESTS}" -t "${{ inputs.pr_number }}"
+          yes n | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" "${RUNTESTS}" -t "${{ inputs.pr_number }}"
 
       - name: Run and monitor PR test ${{ matrix.test }}
         shell: bash
