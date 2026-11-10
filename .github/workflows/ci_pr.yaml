@@ -46,9 +46,43 @@ jobs:
         run: |
           echo "Workflow approved for ${{ inputs.machine }}, proceeding"
 
+  clone:
+    name: Clone Global Workflow
+    needs: gate
+    runs-on: ${{ inputs.machine }}
+    environment:
+      name: ${{ inputs.machine }}
+      deployment: false
+    timeout-minutes: 1440
+
+    steps:
+      # We cannot use GH env to define new env in the GH action, so if we want
+      #   to have derived variables, we have to do it in bash and add to the
+      #   environment.
+      - name: Define paths
+        shell: bash
+        run: |
+          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
+          BUILD_ROOT=${PR_DIR}/global-workflow
+          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+
+      # We need to check the code out in a specific location for use later, so
+      #   we have to check out the code manually instead of using the GH action
+      - name: Checkout merge commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "${PR_DIR}"
+          mkdir -p "${BUILD_ROOT}"
+          git clone --depth 1 "https://github.com/${{ github.repository }}.git" "${BUILD_ROOT}"
+          git -C "${BUILD_ROOT}" fetch origin "pull/${{ inputs.pr_number }}/merge"
+          git -C "${BUILD_ROOT}" checkout FETCH_HEAD
+          git -C "${BUILD_ROOT}" submodule update --init --recursive --jobs 8
+
   build:
     name: Build Global Workflow
-    needs: gate
+    needs: clone
     runs-on: ${{ inputs.machine }}
     environment:
       name: ${{ inputs.machine }}
@@ -71,19 +105,6 @@ jobs:
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
           echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
-
-      # We need to check the code out in a specific location for use later, so
-      #   we have to check out the code manually instead of using the GH action
-      - name: Checkout merge commit
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf "${PR_DIR}"
-          mkdir -p "${BUILD_ROOT}"
-          git clone --depth 1 "https://github.com/${{ github.repository }}.git" "${BUILD_ROOT}"
-          git -C "${BUILD_ROOT}" fetch origin "pull/${{ inputs.pr_number }}/merge"
-          git -C "${BUILD_ROOT}" checkout FETCH_HEAD
-          git -C "${BUILD_ROOT}" submodule update --init --recursive --jobs 8
 
       - name: Build Global Workflow
         shell: bash
@@ -128,7 +149,7 @@ jobs:
 
     strategy:
       fail-fast: true
-      max-parallel: 15
+      max-parallel: 10
       matrix:
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
