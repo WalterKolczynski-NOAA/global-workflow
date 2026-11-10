@@ -125,18 +125,14 @@ jobs:
         run: |
           set -euo pipefail
           cd "${BUILD_ROOT}"
+          rm -Rf "${PR_DIR}/RUNTESTS"
+          # Gets the list of experiments and then stringifies it to make it safe to pass between steps
           json="$( \
             MACHINE_ID='${{ inputs.machine }}' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
             | tail -n +9 \
             | python3 -c 'import json, sys; rows=[line.strip() for line in sys.stdin if line.strip()]; print(json.dumps(rows))')"
 
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
-
-      - name: Generate test experiments
-        shell: bash
-        run: |
-          cd "${BUILD_ROOT}/dev/workflow"
-          ./generate_workflows.sh -A epic -GECS -D "${RUNTESTS}" -t "${{ inputs.pr_number }}"
 
   run_tests:
     name: Run tests
@@ -162,10 +158,16 @@ jobs:
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
+      - name: Generate experiment for ${{ matrix.test }}
+        shell: bash
+        run: |
+          cd "${BUILD_ROOT}/dev/workflow"
+          yes n | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -D "${RUNTESTS}" -t "${{ inputs.pr_number }}"
+
       - name: Run and monitor PR test ${{ matrix.test }}
         shell: bash
         run: |
-          cd "${{ env.PR_ROOT }}/${{ inputs.run_id }}/global-workflow"
+          cd "${PR_DIR}/global-workflow"
           dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
 
   cleanup:
