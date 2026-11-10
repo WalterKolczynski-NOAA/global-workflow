@@ -162,13 +162,13 @@ jobs:
         shell: bash
         run: |
           cd "${BUILD_ROOT}/dev/workflow"
-          yes n | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" "${RUNTESTS}" -t "${{ inputs.pr_number }}"
+          yes n | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -t "PR${{ inputs.pr_number }}" "${RUNTESTS}"
 
       - name: Run and monitor PR test ${{ matrix.test }}
         shell: bash
         run: |
           cd "${PR_DIR}/global-workflow"
-          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
+          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_PR${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
 
   cleanup:
     name: Cleanup
