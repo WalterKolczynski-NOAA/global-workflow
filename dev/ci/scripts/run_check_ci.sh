@@ -64,7 +64,7 @@ set +e
 while true; do
 
     echo "Run rocotorun."
-    rocotorun -v "${ROCOTO_VERBOSE:-0}" -w "${xml}" -d "${db}"
+    rocotorun -v "${ROCOTO_VERBOSE:-0}" -w "${xml}" -d "${db}" || continue
 
     # Wait before running rocotostat
     sleep 60
