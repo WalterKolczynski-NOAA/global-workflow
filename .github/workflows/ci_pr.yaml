@@ -107,7 +107,8 @@ jobs:
           json="$( \
             MACHINE_ID='${{ inputs.machine }}' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
             | tail -n +9 \
-            | python3 -c 'import json, sys; rows=[line.strip() for line in sys.stdin if line.strip()]; print(json.dumps(rows))')"
+            | python3 -c 'import json, sys, random; rows=[line.strip() for line in sys.stdin if line.strip()]; \
+              print(json.dumps([{"name": row, "sleep": random.randint(0, 300)} for row in rows]))')"
 
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
@@ -132,21 +133,24 @@ jobs:
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
-      # - name: Define paths
-      #   shell: bash
-      #   run: |
-      #     PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
-      #     BUILD_ROOT=${PR_DIR}/global-workflow
-      #     echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
-      #     echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+      - name: Stagger start
+        run: sleep ${{ matrix.test.sleep }}
 
-      - name: Run and monitor PR test ${{ matrix.test }}
+      - name: Define paths
+        shell: bash
+        run: |
+          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
+          BUILD_ROOT=${PR_DIR}/global-workflow
+          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+
+      - name: Run and monitor PR test ${{ matrix.test.name }}
         shell: bash
         run: |
           cd "${{ env.PR_ROOT }}/${{ inputs.run_id }}/global-workflow"
           # Sleep a random number of seconds between 0-120 to avoid overloading runners
           # sleep $((RANDOM % 121)) && echo "starting..."
-          dev/ci/scripts/run_check_ci.sh "${{ env.PR_ROOT }}/${{ inputs.run_id }}" "${{ matrix.test }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
+          dev/ci/scripts/run_check_ci.sh "${{ env.PR_ROOT }}/${{ inputs.run_id }}" "${{ matrix.test.name }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test.name }}.log
 
   cleanup:
     name: Cleanup
