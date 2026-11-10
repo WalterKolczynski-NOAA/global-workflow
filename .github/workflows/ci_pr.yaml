@@ -1,5 +1,5 @@
 name: PR CI Pipeline
-#
+
 on:
   workflow_call:
     inputs:
@@ -107,8 +107,7 @@ jobs:
           json="$( \
             MACHINE_ID='${{ inputs.machine }}' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
             | tail -n +9 \
-            | python3 -c 'import json, sys, random; rows=[line.strip() for line in sys.stdin if line.strip()]; \
-              print(json.dumps([{"name": row, "sleep": random.randint(0, 300)} for row in rows]))')"
+            | python3 -c 'import json, sys; rows=[line.strip() for line in sys.stdin if line.strip()]; print(json.dumps(rows))')"
 
           echo "test_list=${json}" >> "$GITHUB_OUTPUT"
 
@@ -129,13 +128,11 @@ jobs:
 
     strategy:
       fail-fast: true
+      max-parallel: 15
       matrix:
         test: ${{ fromJSON(needs.build.outputs.test_list) }}
 
     steps:
-      - name: Stagger start
-        run: sleep ${{ matrix.test.sleep }}
-
       - name: Define paths
         shell: bash
         run: |
@@ -144,13 +141,11 @@ jobs:
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
 
-      - name: Run and monitor PR test ${{ matrix.test.name }}
+      - name: Run and monitor PR test ${{ matrix.test }}
         shell: bash
         run: |
           cd "${{ env.PR_ROOT }}/${{ inputs.run_id }}/global-workflow"
-          # Sleep a random number of seconds between 0-120 to avoid overloading runners
-          # sleep $((RANDOM % 121)) && echo "starting..."
-          dev/ci/scripts/run_check_ci.sh "${{ env.PR_ROOT }}/${{ inputs.run_id }}" "${{ matrix.test.name }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test.name }}.log
+          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
 
   cleanup:
     name: Cleanup
