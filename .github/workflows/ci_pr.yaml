@@ -155,6 +155,7 @@ jobs:
         run: |
           PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
           BUILD_ROOT=${PR_DIR}/global-workflow
+          RUNTESTS="${PR_DIR}/RUNTESTS"
           echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
           echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
           echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
@@ -163,7 +164,7 @@ jobs:
         shell: bash
         run: |
           cd "${BUILD_ROOT}/dev/workflow"
-          yes n | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -t "PR${{ inputs.pr_number }}" "${RUNTESTS}"
+          echo "n" | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -t "PR${{ inputs.pr_number }}" "${RUNTESTS}"
 
       - name: Run and monitor PR test ${{ matrix.test }}
         shell: bash
