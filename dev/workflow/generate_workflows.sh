@@ -679,7 +679,9 @@ fi
 # --------------------------------------------------------------------------- #
 
 # Create the experiments
-rm -f "tests.cron" "${_verbose_flag}"
+# Use a random cron file nameto avoid collisions when running in parallel
+master_cron_file=$( tr -cd 'a-z0-9' < /dev/urandom | head -c 12)
+rm -f "${master_cron_file}" "${_verbose_flag}"
 echo "Running create_experiment.py for ${#_yaml_list[@]} cases"
 
 if [[ "${_verbose}" == true ]]; then
@@ -752,7 +754,7 @@ EOF
         # will call them all sequentially to reduce simultaneous rocoto instances.
         _scron_sh_files+=("${scron_sh_file}")
     else
-        grep "${_pslot}" "${_runtests}/EXPDIR/${_pslot}/${_pslot}.crontab" >> tests.cron
+        grep "${_pslot}" "${_runtests}/EXPDIR/${_pslot}/${_pslot}.crontab" >> "${master_cron_file}"
     fi
 done
 echo
@@ -814,24 +816,24 @@ if [[ "${_use_scron}" == true && ${#_scron_sh_files[@]} -gt 0 ]]; then
         echo "*/5 * * * * ${_master_script}"
         echo "#################################################################"
         echo
-    } >> tests.cron
+    } >> "${master_cron_file}"
 fi
 
 # --------------------------------------------------------------------------- #
 # Configure Mail Behavior
 # --------------------------------------------------------------------------- #
 
-# Add MAILTO to tests.cron for regular crontab
+# Add MAILTO to ${master_cron_file} for regular crontab
 if [[ "${_use_scron}" == false ]]; then
     if [[ "${_set_email}" == "true" ]]; then
         # Use email from -e flag
-        sed -i "1i MAILTO=\"${_email}\"" tests.cron
+        sed -i "1i MAILTO=\"${_email}\"" "${master_cron_file}"
     elif [[ -n "${REPLYTO:-}" ]]; then
         # Use REPLYTO environment variable
-        sed -i "1i MAILTO=\"${REPLYTO}\"" tests.cron
+        sed -i "1i MAILTO=\"${REPLYTO}\"" "${master_cron_file}"
     else
         # Use empty MAILTO
-        sed -i "1i MAILTO=\"\"" tests.cron
+        sed -i "1i MAILTO=\"\"" "${master_cron_file}"
     fi
 fi
 
@@ -859,9 +861,9 @@ if [[ "${_update_cron}" == "true" ]]; then
     # Save existing MAILTO before removing it
     existing_mailto=$(grep "^MAILTO=" existing.cron 2> /dev/null | head -1 || echo "")
 
-    # Remove ALL MAILTO lines from existing.cron and tests.cron to prevent duplicates
+    # Remove ALL MAILTO lines from existing.cron and ${master_cron_file} to prevent duplicates
     sed -i '/^MAILTO=/d' existing.cron 2> /dev/null || true
-    sed -i '/^MAILTO=/d' tests.cron 2> /dev/null || true
+    sed -i '/^MAILTO=/d' "${master_cron_file}" 2> /dev/null || true
 
     if [[ "${_set_email}" == "true" ]]; then
         # For scrontab, REPLYTO is already exported earlier; for crontab, set MAILTO
@@ -895,7 +897,7 @@ if [[ "${_update_cron}" == "true" ]]; then
         fi
     fi
 
-    cat existing.cron tests.cron >> final.cron
+    cat existing.cron "${master_cron_file}" >> final.cron
 
     if [[ "${_verbose}" == "true" ]]; then
         echo "Setting crontab to:"
@@ -907,7 +909,7 @@ if [[ "${_update_cron}" == "true" ]]; then
     ${_crontab_cmd} final.cron
 else
     mail_warning
-    _cron_tests=$(cat tests.cron)
+    _cron_tests=$(cat "${master_cron_file}")
     _message=$(
         cat << EOF
         "Add the following to your crontab or scrontab to start running:"
@@ -935,7 +937,7 @@ fi
 
 # Cleanup
 if [[ "${_debug}" == "false" ]]; then
-    rm -f final.cron existing.cron tests.cron "${_verbose_flag}"
+    rm -f final.cron existing.cron "${master_cron_file}" "${_verbose_flag}"
 fi
 
 echo "Success!!"
