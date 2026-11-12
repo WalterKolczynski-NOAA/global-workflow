@@ -164,7 +164,7 @@ jobs:
         shell: bash
         run: |
           cd "${BUILD_ROOT}/dev/workflow"
-          echo "n\ny" | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -P -t "PR${{ inputs.pr_number }}" "${RUNTESTS}"
+          echo "n" | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -P -t "PR${{ inputs.pr_number }}" "${RUNTESTS}"
 
       - name: Run and monitor PR test ${{ matrix.test }}
         shell: bash
