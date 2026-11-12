@@ -680,7 +680,7 @@ fi
 
 # Create the experiments
 # Use a random cron file nameto avoid collisions when running in parallel
-master_cron_file=$( tr -cd 'a-z0-9' < /dev/urandom | head -c 12)
+master_cron_file=$(uuidgen)
 rm -f "${master_cron_file}" "${_verbose_flag}"
 echo "Running create_experiment.py for ${#_yaml_list[@]} cases"
 
