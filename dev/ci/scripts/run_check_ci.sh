@@ -114,4 +114,5 @@ while true; do
 
 done
 
+echo "Exit code: ${rc}"
 exit "${rc}"

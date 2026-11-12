@@ -143,6 +143,9 @@ jobs:
       name: ${{ inputs.machine }}
       deployment: false
 
+    env:
+      NODE_OPTIONS: --max-old-space-size=1024
+
     strategy:
       fail-fast: true
       # max-parallel: 10
@@ -170,7 +173,7 @@ jobs:
         shell: bash
         run: |
           cd "${PR_DIR}/global-workflow"
-          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_PR${{ inputs.pr_number }}" | tee dev/ci/scripts/run_check_ci.${{ matrix.test }}.log
+          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_PR${{ inputs.pr_number }}"
 
   cleanup:
     name: Cleanup
