@@ -30,6 +30,8 @@ function _usage() {
 
     -D Delete the RUNTESTS and DATAROOT directories if they already exist
 
+    -P Delete the DATAROOT directory if it exists, but NOT the RUNTESTS directory
+
     -Y /path/to/directory/with/YAMLs
        If this option is not specified, then the \${HOMEglobal}/dev/ci/cases/pr
        directory is used.
@@ -124,7 +126,8 @@ _verbose_flag="--"
 _debug="false"
 _cwd=$(pwd)
 _runtests="${RUNTESTS:-${_runtests:-}}"
-_auto_del=false
+_auto_del_tests=false
+_auto_del_data=false
 _nonflag_option_count=0
 _use_scron=false
 declare -a _scron_sh_files=()
@@ -154,7 +157,8 @@ function _parse_option() {
             ;;
         b) _build=true ;;
         B) _build=true && _compute_build=true ;;
-        D) _auto_del=true ;;
+        D) _auto_del_tests=true && _auto_del_data=true ;;
+        P) _auto_del_data=true ;;
         u) _update_submods=true ;;
 
         # Test/case selection
@@ -196,7 +200,7 @@ function _parse_option() {
 
 function _parse_args() {
     while [[ $# -gt 0 && "$1" != "--" ]]; do
-        while getopts ":H:bBDuy:Y:GESCA:I:ce:t:vVdhL" option; do
+        while getopts ":H:bBDPuy:Y:GESCA:I:ce:t:vVdhL" option; do
             _parse_option
         done
 
@@ -309,7 +313,7 @@ if [[ "${_list_only}" == "false" ]]; then
         set -e
     else
         echo "The RUNTESTS directory ${_runtests} already exists."
-        if [[ "${_auto_del}" == "true" ]]; then
+        if [[ "${_auto_del_tests}" == "true" ]]; then
             echo "Removing."
             rm -rf "${_runtests}"
         else
@@ -721,7 +725,7 @@ EOF
     )"
     if [[ -d "${_dataroot}" ]]; then
         echo "WARNING DATAROOT already exists for ${_pslot} in ${_dataroot}"
-        if [[ "${_auto_del}" == "true" ]]; then
+        if [[ "${_auto_del_data}" == "true" ]]; then
             echo "Deleting."
             rm -rf "${_dataroot}"
         else
