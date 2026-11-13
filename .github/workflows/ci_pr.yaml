@@ -167,6 +167,11 @@ jobs:
         shell: bash
         run: |
           cd "${BUILD_ROOT}/dev/workflow"
+          # We're not deleting existing RUNTESTS directory as part of generate_workflows to avoid collisions
+          # So do it manually for just this experiment
+          rm -Rf "${RUNTESTS}/EXPDIR/${{ matrix.test }}_PR${{ inputs.pr_number }}"
+          rm -Rf "${RUNTESTS}/COMROOT/${{ matrix.test }}_PR${{ inputs.pr_number }}"
+          # Create the experiments, deleting only DATAROOT for this test with -P
           echo "n" | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -P -t "PR${{ inputs.pr_number }}" "${RUNTESTS}"
 
       - name: Run and monitor PR test ${{ matrix.test }}
