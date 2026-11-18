@@ -89,9 +89,6 @@ jobs:
       deployment: false
     timeout-minutes: 1440
 
-    outputs:
-      test_list: ${{ steps.list_tests.outputs.test_list }}
-
     steps:
       # We cannot use GH env to define new env in the GH action, so if we want
       #   to have derived variables, we have to do it in bash and add to the
@@ -118,78 +115,19 @@ jobs:
           cd "${BUILD_ROOT}"
           sorc/link_workflow.sh
 
-      - name: List tests
-        id: list_tests
-        shell: bash
-        # Get the list of tests that will be run so we can use it as a matrix
-        run: |
-          set -euo pipefail
-          cd "${BUILD_ROOT}"
-          rm -Rf "${PR_DIR}/RUNTESTS"
-          # Gets the list of experiments and then stringifies it to make it safe to pass between steps
-          json="$( \
-            MACHINE_ID='${{ inputs.machine }}' dev/workflow/generate_workflows.sh -L -GECS 2> /dev/null \
-            | tail -n +9 \
-            | python3 -c 'import json, sys; rows=[line.strip() for line in sys.stdin if line.strip()]; print(json.dumps(rows))')"
-
-          echo "test_list=${json}" >> "$GITHUB_OUTPUT"
-
-  run_tests:
-    name: Run tests
-    needs: build
-    runs-on: ${{ inputs.machine }}
-    timeout-minutes: 1440
-    environment:
-      name: ${{ inputs.machine }}
-      deployment: false
-
-    env:
-      NODE_OPTIONS: --max-old-space-size=1024
-
-    strategy:
-      fail-fast: true
-      # max-parallel: 10
-      matrix:
-        test: ${{ fromJSON(needs.build.outputs.test_list) }}
-
-    steps:
-      - name: Define paths
-        shell: bash
-        run: |
-          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
-          BUILD_ROOT=${PR_DIR}/global-workflow
-          RUNTESTS="${PR_DIR}/RUNTESTS"
-          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
-          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
-          echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
-
-      - name: Generate experiment for ${{ matrix.test }}
+      - name: Generate experiments
         shell: bash
         run: |
           cd "${BUILD_ROOT}/dev/workflow"
-          # We're not deleting existing RUNTESTS directory as part of generate_workflows to avoid collisions
-          # So do it manually for just this experiment
-          rm -Rf "${RUNTESTS}/EXPDIR/${{ matrix.test }}_PR${{ inputs.pr_number }}"
-          rm -Rf "${RUNTESTS}/COMROOT/${{ matrix.test }}_PR${{ inputs.pr_number }}"
-          # Create the experiments, deleting only DATAROOT for this test with -P
-          echo "n" | ./generate_workflows.sh -A epic -y "${{ matrix.test }}" -P -t "PR${{ inputs.pr_number }}" "${RUNTESTS}"
+          ./generate_workflows.sh -A epic -GECS -D -t "PR${{ inputs.pr_number }}" "${RUNTESTS}"
 
-      - name: Run and monitor PR test ${{ matrix.test }}
+      - name: Run and monitor tests
         shell: bash
         run: |
           cd "${PR_DIR}/global-workflow"
-          dev/ci/scripts/run_check_ci.sh "${PR_DIR}" "${{ matrix.test }}_PR${{ inputs.pr_number }}"
+          source dev/ush/gw_setup.sh
+          dev/ci/scripts/monitor_ci.py "${RUNTESTS}/EXPDIR"
 
-  cleanup:
-    name: Cleanup
-    needs: run_tests
-    runs-on: ${{ inputs.machine }}
-    timeout-minutes: 1440
-    environment:
-      name: ${{ inputs.machine }}
-      deployment: false
-
-    steps:
       - name: Cleanup up PR directory
         shell: bash
         run: |
