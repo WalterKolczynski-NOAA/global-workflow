@@ -115,6 +115,26 @@ jobs:
           cd "${BUILD_ROOT}"
           sorc/link_workflow.sh
 
+  run_tests:
+    name: Run tests
+    needs: build
+    runs-on: ${{ inputs.machine }}
+    timeout-minutes: 1440
+    environment:
+      name: ${{ inputs.machine }}
+      deployment: false
+
+    steps:
+      - name: Define paths
+        shell: bash
+        run: |
+          PR_DIR=${{ env.PR_ROOT }}/${{ inputs.run_id }}
+          BUILD_ROOT=${PR_DIR}/global-workflow
+          RUNTESTS="${PR_DIR}/RUNTESTS"
+          echo "PR_DIR=${PR_DIR}" >> $GITHUB_ENV
+          echo "BUILD_ROOT=${BUILD_ROOT}" >> $GITHUB_ENV
+          echo "RUNTESTS=${RUNTESTS}" >> $GITHUB_ENV
+
       - name: Generate experiments
         shell: bash
         run: |
@@ -124,10 +144,20 @@ jobs:
       - name: Run and monitor tests
         shell: bash
         run: |
-          cd "${PR_DIR}/global-workflow"
+          cd "${BUILD_ROOT}"
           source dev/ush/gw_setup.sh
-          dev/ci/scripts/monitor_ci.py "${RUNTESTS}/EXPDIR"
+          dev/ci/scripts/monitor_ci.py "${PR_DIR}/EXPDIR"
 
+  cleanup:
+    name: Cleanup
+    needs: run_tests
+    runs-on: ${{ inputs.machine }}
+    timeout-minutes: 1440
+    environment:
+      name: ${{ inputs.machine }}
+      deployment: false
+
+    steps:
       - name: Cleanup up PR directory
         shell: bash
         run: |
