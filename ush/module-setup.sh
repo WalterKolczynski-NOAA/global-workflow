@@ -30,7 +30,7 @@ elif [[ ${MACHINE_ID} = ursa* ]]; then
     if ! type sbatch > /dev/null 2>&1; then
         PATH="${PATH}:/apps/slurm/default/bin"
     fi
-    
+
     if (! eval module help > /dev/null 2>&1); then
         set +u
         source /apps/lmod/lmod/init/bash
