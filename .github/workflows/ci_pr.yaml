@@ -146,7 +146,7 @@ jobs:
         run: |
           cd "${BUILD_ROOT}"
           source dev/ush/gw_setup.sh
-          dev/ci/scripts/monitor_ci.py "${PR_DIR}/EXPDIR"
+          dev/ci/scripts/monitor_ci.py "${RUNTESTS}/EXPDIR"
 
   cleanup:
     name: Cleanup
