@@ -28,9 +28,13 @@ if [[ ${MACHINE_ID} = hera* ]]; then
 elif [[ ${MACHINE_ID} = ursa* ]]; then
     # We are on NOAA Ursa
     if (! eval module help > /dev/null 2>&1); then
+        set +u
         source /apps/lmod/lmod/init/bash
+        set -u
     fi
     export LMOD_SYSTEM_DEFAULT_MODULES=lmod
+    # MODULEPATH sometimes isn't set properly in non-interactive shells on Ursa, so we set it explicitly here.
+    export MODULEPATH=${MODULEPATH:-/apps/lmod/lmod/modulefiles/Core:/apps/spack/modules/linux-rocky9-x86_64/Core:/apps/modules/modulefiles}
     set +u
     module reset
     set -u
