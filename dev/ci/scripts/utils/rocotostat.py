@@ -339,9 +339,9 @@ def rocotostat_summary(rocotostat, thread_logging_enabled=False):
     duration = (
         max(entry['deactivated'] for entry in rocotostat_output) - min(entry['activated'] for entry in rocotostat_output)
         if (
-            rocotostat_output
-            and all(entry['activated'] for entry in rocotostat_output)
-            and all(entry['deactivated'] for entry in rocotostat_output)
+            rocotostat_output and
+            all(entry['activated'] for entry in rocotostat_output) and
+            all(entry['deactivated'] for entry in rocotostat_output)
         )
         else None
     )
