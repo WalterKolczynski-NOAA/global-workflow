@@ -12,8 +12,8 @@ SLEEP_DURATION = 120  # Sleep duration (seconds) between rocoto runs
 MAX_RUN_TIME = timedelta(hours=24)
 MAX_CONSECUTIVE_UNAVAILABLE = 3
 
-# This scrpit is a utility with unix style pipe-able side effects so
-# stdout True only if LOGGING_LEVEL is DEBUG, else False
+# This scrpit is a utility with unix style pipe-able side effects so stdout True
+# only if LOGGING_LEVEL is DEBUG, else False
 _log_level = os.environ.get("LOGGING_LEVEL", "INFO").upper()
 _stdout = _log_level == "DEBUG"
 logger = Logger(
@@ -28,22 +28,25 @@ def input_args():
     """
     Parse command-line arguments for rocotostat workflow analysis.
 
-    This function configures and parses command-line arguments used to specify the Rocoto workflow XML document and database
-    file, along with optional flags for verbose output and bash declare functionality. The function validates input files and
-    returns a namespace object containing all parsed arguments for use throughout the rocotostat analysis process.
+    This function configures and parses command-line arguments used to specify
+    the Rocoto workflow XML document and database file, along with optional
+    flags for verbose output and bash declare functionality. The function
+    validates input files and returns a namespace object containing all parsed
+    arguments for use throughout the rocotostat analysis process.
 
     Returns
     -------
     args : Namespace
-        The parsed command-line arguments containing workflow document path, database file path, and output format options.
+        The parsed command-line arguments containing workflow document path,
+        database file path, and output format options.
     """
 
     description = """
-        Using rocotostat to get the status of all jobs this scripts
-        determines rocoto_state: if all cycles are done, then rocoto_state
-        is Done. Assuming rocotorun had just been run, and the rocoto_state
-        is not Done, then rocoto_state is Stalled if there are no jobs that
-        are RUNNING, SUBMITTING, or QUEUED.
+        Using rocotostat to get the status of all jobs this scripts determines
+        rocoto_state: if all cycles are done, then rocoto_state is Done.
+        Assuming rocotorun had just been run, and the rocoto_state is not Done,
+        then rocoto_state is Stalled if there are no jobs that are RUNNING,
+        SUBMITTING, or QUEUED.
         """
 
     parser = ArgumentParser(description=description)
@@ -61,15 +64,17 @@ def print_status(rocoto_status):
     """
     Print the status of the Rocoto workflow for each experiment.
 
-    This function takes a dictionary containing the status of each experiment's Rocoto workflow and prints a summary of the
-    overall status, including whether all experiments are done or if any have failed jobs. It also provides detailed information
-    about each experiment's status, including the number of cycles completed and the total number of cycles.
+    This function takes a dictionary containing the status of each experiment's
+    Rocoto workflow and prints a summary of the overall status, including
+    whether all experiments are done or if any have failed jobs. It also
+    provides detailed information about each experiment's status, including the
+    number of cycles completed and the total number of cycles.
 
     Parameters
     ----------
     rocoto_status : dict
-        A dictionary where keys are experiment names and values are dictionaries containing the status information for each
-        experiment's Rocoto workflow.
+        A dictionary where keys are experiment names and values are dictionaries
+        containing the status information for each experiment's Rocoto workflow.
     """
 
     if not rocoto_status:
@@ -108,19 +113,26 @@ def check_end_states(rocoto_status, consecutive_unavailable_count):
     """
     Check the end states of the Rocoto workflow and handle exit conditions.
 
-    This function evaluates the status of each experiment's Rocoto workflow to determine if all experiments are done, if any have failed jobs, or if the status is unavailable or unknown. It increments a counter for consecutive unavailable or unknown states and exits the script with appropriate exit codes based on the conditions met.
+    This function evaluates the status of each experiment's Rocoto workflow to
+    determine if all experiments are done, if any have failed jobs, or if the
+    status is unavailable or unknown. It increments a counter for consecutive
+    unavailable or unknown states and exits the script with appropriate exit
+    codes based on the conditions met.
 
     Parameters
     ----------
     rocoto_status : dict
-        A dictionary where keys are experiment names and values are dictionaries containing the status information for each experiment's Rocoto workflow.
+        A dictionary where keys are experiment names and values are dictionaries
+        containing the status information for each experiment's Rocoto workflow.
     consecutive_unavailable_count : int
-        The current count of consecutive checks where the Rocoto status was unavailable or unknown.
+        The current count of consecutive checks where the Rocoto status was
+        unavailable or unknown.
 
     Returns
     -------
     consecutive_unavailable_count : int
-        The updated count of consecutive checks where the Rocoto status was unavailable or unknown.
+        The updated count of consecutive checks where the Rocoto status was
+        unavailable or unknown.
 
     """
 
@@ -149,9 +161,9 @@ if __name__ == '__main__':
     """
     main Execute the script.
 
-    main() parses the input arguments, checks if the rocotostat command is available,
-    adds default arguments to the rocotostat command, and runs it and reports
-    out to stdout spcific information of rocoto workflow.
+    main() parses the input arguments, checks if the rocotostat command is
+    available, adds default arguments to the rocotostat command, and runs it and
+    reports out to stdout spcific information of rocoto workflow.
     """
 
     args = input_args()
@@ -207,7 +219,8 @@ if __name__ == '__main__':
 
         print_status(rocoto_status)
 
-        # Check for end states and remember how many times in a row the status was unavailable or unknown
+        # Check for end states and remember how many times in a row the status
+        # was unavailable or unknown
         consecutive_unavailable_count = check_end_states(rocoto_status, consecutive_unavailable_count)
 
         logger.info(f'Sleeping for {SLEEP_DURATION} seconds before next check...')
