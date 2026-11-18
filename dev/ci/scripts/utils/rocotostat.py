@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 import sys
 import os
-import copy
 from time import sleep, time
 
 from wxflow import which, Logger, CommandNotFoundError, ProcessError
@@ -15,6 +15,9 @@ from collections import Counter
 # ============================================================================
 
 # Rocoto command retry configuration
+ROCOTO_RUN_MAX_ATTEMPTS = 3        # Maximum attempts for rocotorun
+ROCOTO_RUN_SLEEP_DURATION = 120    # Sleep duration (seconds) between rocotorun attempts
+
 ROCOTO_SUMMARY_MAX_ATTEMPTS = 3        # Maximum attempts for rocotostat --summary
 ROCOTO_SUMMARY_SLEEP_DURATION = 120    # Sleep duration (seconds) between summary attempts
 
@@ -29,7 +32,15 @@ TELESCOPING_MAX_DELAY_SECONDS = 600    # Maximum delay cap for telescoping retri
 TELESCOPING_DELAY_MULTIPLIER = 2       # Base multiplier for exponential backoff
 
 # Exit codes
-EXIT_CODE_STALLED = 3                  # Exit code when workflow is stalled
+EXIT_CODE = {
+    'DONE': 0,          # Exit code when workflow is done
+    'FAIL': 1,          # Exit code when workflow has failed jobs
+    'RUNNING': 2,       # Exit code when workflow is still running
+    'STALLED': 3,       # Exit code when workflow is stalled
+    'UNAVAILABLE': 4,   # Exit code when workflow has unavailable jobs
+    'UNKNOWN': 5,        # Exit code when workflow has unknown job states
+    'MAX_TIME_EXCEEDED': 6   # Exit code when maximum time exceeded
+}
 
 # ============================================================================
 
@@ -239,6 +250,32 @@ def input_args():
     return args
 
 
+def run_rocoto(rocotorun, thread_logging_enabled=False):
+    """
+    Execute rocotostat with summary flag and analyze workflow cycle completion status.
+
+    This function invokes the rocotorun command to run the Rocoto workflow,
+    handling retries if the scheduler infrastructure is temporarily unavailable.
+
+    Parameters
+    ----------
+    rocotorun : callable
+    thread_logging_enabled : bool, optional
+        Whether to enable thread count logging during rocotostat execution. Default is False.
+
+    Returns
+    -------
+    None
+
+    """
+
+    attempt_multiple_times(lambda: rocotorun(),
+                           ROCOTO_RUN_MAX_ATTEMPTS,
+                           ROCOTO_RUN_SLEEP_DURATION,
+                           ProcessError,
+                           thread_logging_enabled=thread_logging_enabled)
+
+
 def rocotostat_summary(rocotostat, thread_logging_enabled=False):
     """
     Execute rocotostat with summary flag and analyze workflow cycle completion status.
@@ -261,17 +298,58 @@ def rocotostat_summary(rocotostat, thread_logging_enabled=False):
         Dictionary containing 'CYCLES_TOTAL' (total cycles) and 'CYCLES_DONE' (completed cycles) for status tracking.
     """
 
-    rocotostat_output = attempt_multiple_times(lambda: rocotostat("--summary", output=str),
-                                               ROCOTO_SUMMARY_MAX_ATTEMPTS,
-                                               ROCOTO_SUMMARY_SLEEP_DURATION,
-                                               ProcessError,
-                                               thread_logging_enabled=thread_logging_enabled)
-    rocotostat_output = rocotostat_output.splitlines()[1:]
-    rocotostat_output = [line.split()[0:2] for line in rocotostat_output]
+    rocotostat_output_raw = attempt_multiple_times(lambda: rocotostat("--summary", output=str),
+                                                   ROCOTO_SUMMARY_MAX_ATTEMPTS,
+                                                   ROCOTO_SUMMARY_SLEEP_DURATION,
+                                                   ProcessError,
+                                                   thread_logging_enabled=thread_logging_enabled)
+    rocotostat_output_raw = rocotostat_output_raw.splitlines()[1:]
+
+    rocotostat_output = []
+    for line in rocotostat_output_raw:
+        cycle = line[0:12].strip()
+        state = line[16:24].strip()
+        activated_str = line[28:48].strip()
+        deactivated_str = line[52:72].strip()
+
+        activated = None
+        if activated_str and activated_str != '-':
+            try:
+                activated = datetime.strptime(activated_str, "%b %d %Y %H:%M:%S")
+            except ValueError:
+                activated = None
+
+        deactivated = None
+        if deactivated_str and deactivated_str != '-':
+            try:
+                deactivated = datetime.strptime(deactivated_str, "%b %d %Y %H:%M:%S")
+            except ValueError:
+                deactivated = None
+
+        rocotostat_output.append({
+            'cycle': cycle,
+            'state': state,
+            'activated': activated,
+            'deactivated': deactivated
+        })
+
+    if _log_level == "DEBUG":
+        logger.debug(rocotostat_output)
+
+    duration = (
+        max(entry['deactivated'] for entry in rocotostat_output) - min(entry['activated'] for entry in rocotostat_output)
+        if (
+            rocotostat_output
+            and all(entry['activated'] for entry in rocotostat_output)
+            and all(entry['deactivated'] for entry in rocotostat_output)
+        )
+        else None
+    )
 
     rocoto_status = {
         'CYCLES_TOTAL': len(rocotostat_output),
-        'CYCLES_DONE': sum([sublist.count('Done') for sublist in rocotostat_output])
+        'CYCLES_DONE': sum(1 for entry in rocotostat_output if entry['state'] == 'Done'),
+        'DURATION': duration
     }
     return rocoto_status
 
@@ -315,6 +393,44 @@ def rocoto_statcount(rocotostat, thread_logging_enabled=False):
         rocoto_status[case] = status_counts[case]
     rocoto_status['JOBS_TOTAL'] = len(rocotostat_output)
     rocoto_status['JOBS_DONE'] = status_counts['SUCCEEDED']
+
+    return rocoto_status
+
+
+def rocoto_status(rocotostat, thread_logging_enabled=False):
+    """
+    Execute rocotostat to retrieve both summary and detailed job status information, combining results into a single status dictionary.
+    """
+    rocoto_status = rocoto_statcount(rocotostat, thread_logging_enabled=thread_logging_enabled)
+    rocoto_status.update(rocotostat_summary(rocotostat, thread_logging_enabled=thread_logging_enabled))
+
+    if is_done(rocoto_status):
+        rocoto_state = 'DONE'
+    elif rocoto_status['DEAD'] > 0:
+        rocoto_state = 'FAIL'
+    elif rocoto_status['UNAVAILABLE'] > 0 or rocoto_status['UNKNOWN'] > 0:
+        rocoto_status = attempt_multiple_times(lambda: rocoto_statcount(rocotostat, thread_logging_enabled=thread_logging_enabled),
+                                               ROCOTO_RETRY_MAX_ATTEMPTS,
+                                               ROCOTO_RETRY_SLEEP_DURATION,
+                                               ProcessError,
+                                               thread_logging_enabled=thread_logging_enabled)
+        rocoto_state = 'RUNNING'
+        if rocoto_status['UNAVAILABLE'] > 0:
+            rocoto_state = 'UNAVAILABLE'
+        if rocoto_status['UNKNOWN'] > 0:
+            rocoto_state = 'UNKNOWN'
+    elif is_stalled(rocoto_status):
+        rocoto_status = attempt_multiple_times(lambda: rocoto_statcount(rocotostat, thread_logging_enabled=thread_logging_enabled),
+                                               ROCOTO_RETRY_MAX_ATTEMPTS,
+                                               ROCOTO_RETRY_SLEEP_DURATION,
+                                               ProcessError,
+                                               thread_logging_enabled=thread_logging_enabled)
+        if is_stalled(rocoto_status):
+            rocoto_state = 'STALLED'
+    else:
+        rocoto_state = 'RUNNING'
+
+    rocoto_status['ROCOTO_STATE'] = rocoto_state
 
     return rocoto_status
 
@@ -384,42 +500,7 @@ if __name__ == '__main__':
     rocotostat.add_default_arg(['-w', os.path.abspath(args.w.name), '-d', os.path.abspath(args.d.name)])
 
     # --- PATCH: Pass thread_logging_enabled from args.thread_logging ---
-    rocoto_status = rocoto_statcount(rocotostat, thread_logging_enabled=args.thread_logging)
-    rocoto_status.update(rocotostat_summary(rocotostat, thread_logging_enabled=args.thread_logging))
-
-    error_return = 0
-    if is_done(rocoto_status):
-        rocoto_state = 'DONE'
-    elif rocoto_status['DEAD'] > 0:
-        error_return = rocoto_status['FAIL'] + rocoto_status['DEAD']
-        rocoto_state = 'FAIL'
-    elif rocoto_status['UNAVAILABLE'] > 0 or rocoto_status['UNKNOWN'] > 0:
-        rocoto_status = attempt_multiple_times(lambda: rocoto_statcount(rocotostat, thread_logging_enabled=args.thread_logging),
-                                               ROCOTO_RETRY_MAX_ATTEMPTS,
-                                               ROCOTO_RETRY_SLEEP_DURATION,
-                                               ProcessError,
-                                               thread_logging_enabled=args.thread_logging)
-        error_return = 0
-        rocoto_state = 'RUNNING'
-        if rocoto_status['UNAVAILABLE'] > 0:
-            error_return = rocoto_status['UNAVAILABLE']
-            rocoto_state = 'UNAVAILABLE'
-        if rocoto_status['UNKNOWN'] > 0:
-            error_return += rocoto_status['UNKNOWN']
-            rocoto_state = 'UNKNOWN'
-    elif is_stalled(rocoto_status):
-        rocoto_status = attempt_multiple_times(lambda: rocoto_statcount(rocotostat, thread_logging_enabled=args.thread_logging),
-                                               ROCOTO_RETRY_MAX_ATTEMPTS,
-                                               ROCOTO_RETRY_SLEEP_DURATION,
-                                               ProcessError,
-                                               thread_logging_enabled=args.thread_logging)
-        if is_stalled(rocoto_status):
-            error_return = EXIT_CODE_STALLED
-            rocoto_state = 'STALLED'
-    else:
-        rocoto_state = 'RUNNING'
-
-    rocoto_status['ROCOTO_STATE'] = rocoto_state
+    rocoto_status = rocoto_status(rocotostat, thread_logging_enabled=args.thread_logging)
 
     if args.verbose or args.v:
         for status in rocoto_status:
@@ -432,8 +513,8 @@ if __name__ == '__main__':
         for status in rocoto_status:
             print(f'declare {status}={rocoto_status[status]}')
     else:
-        print(rocoto_state)
+        print(rocoto_status['ROCOTO_STATE'])
 
     # Log thread count at end
     log_thread_count("END", args.thread_logging)
-    sys.exit(error_return)
+    sys.exit(EXIT_CODE[rocoto_status['ROCOTO_STATE']])
