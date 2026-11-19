@@ -144,10 +144,16 @@ def check_end_states(rocoto_status, consecutive_unavailable_count):
         logger.info("All experiments are done.")
         sys.exit(rs.EXIT_CODE['DONE'])
 
-    for status in ['FAIL', 'ERROR', 'STALLED']:
-        if any(status['ROCOTO_STATE'] == status for status in rocoto_status.values()):
-            logger.error(f"One or more experiments have {status.lower()} jobs.")
-            sys.exit(rs.EXIT_CODE[status])
+    state_exit_codes = {
+        'FAIL': 'FAIL',
+        'ERROR': 'FAIL',
+        'STALLED': 'STALLED',
+    }
+
+    for state_name in ['FAIL', 'ERROR', 'STALLED']:
+        if any(exp_status['ROCOTO_STATE'] == state_name for exp_status in rocoto_status.values()):
+            logger.error(f"One or more experiments have {state_name.lower()} jobs.")
+            sys.exit(rs.EXIT_CODE[state_exit_codes[state_name]])
 
     if any(status['ROCOTO_STATE'] in ['UNAVAILABLE', 'UNKNOWN'] for status in rocoto_status.values()):
         consecutive_unavailable_count += 1
