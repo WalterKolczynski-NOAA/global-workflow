@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+from functools import partial
 import os
 import sys
 from time import sleep
@@ -11,6 +12,8 @@ from datetime import datetime, timedelta
 SLEEP_DURATION = 120  # Sleep duration (seconds) between rocoto runs
 MAX_RUN_TIME = timedelta(hours=24)
 MAX_CONSECUTIVE_UNAVAILABLE = 3
+
+print = partial(print, flush=True)  # Ensure print statements are flushed immediately
 
 # This scrpit is a utility with unix style pipe-able side effects so stdout True
 # only if LOGGING_LEVEL is DEBUG, else False
@@ -101,13 +104,14 @@ def print_status(rocoto_status):
     header_line = " | ".join(header.rjust(column_widths[i]) for i, header in enumerate(headers))
     separator_line = "-+-".join("-" * column_widths[i] for i in range(len(headers)))
 
+    print('')
     print(f'  Status at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  '.center(len(header_line), '='))
     print(header_line)
     print(separator_line)
     for row in rows:
         print(" | ".join(value.rjust(column_widths[i]) for i, value in enumerate(row)))
-    print()
-
+    print('='*len(header_line))
+    print('')
 
 def check_end_states(rocoto_status, consecutive_unavailable_count):
     """
