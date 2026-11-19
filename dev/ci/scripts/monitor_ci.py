@@ -110,8 +110,9 @@ def print_status(rocoto_status):
     print(separator_line)
     for row in rows:
         print(" | ".join(value.rjust(column_widths[i]) for i, value in enumerate(row)))
-    print('='*len(header_line))
+    print('=' * len(header_line))
     print('')
+
 
 def check_end_states(rocoto_status, consecutive_unavailable_count):
     """
