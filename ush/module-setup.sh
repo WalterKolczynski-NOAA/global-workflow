@@ -27,6 +27,7 @@ if [[ ${MACHINE_ID} = hera* ]]; then
 
 elif [[ ${MACHINE_ID} = ursa* ]]; then
     # We are on NOAA Ursa
+    # The PATH is not set correctly in non-interactive shells on Ursa, so we add the slurm bin directory to the PATH here.
     if ! type sbatch > /dev/null 2>&1; then
         PATH="${PATH}:/apps/slurm/default/bin"
     fi

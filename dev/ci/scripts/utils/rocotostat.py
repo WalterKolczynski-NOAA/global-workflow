@@ -33,12 +33,12 @@ TELESCOPING_DELAY_MULTIPLIER = 2       # Base multiplier for exponential backoff
 
 # Exit codes
 EXIT_CODE = {
-    'DONE': 0,          # Exit code when workflow is done
-    'FAIL': 1,          # Exit code when workflow has failed jobs
-    'RUNNING': 2,       # Exit code when workflow is still running
-    'STALLED': 3,       # Exit code when workflow is stalled
-    'UNAVAILABLE': 4,   # Exit code when workflow has unavailable jobs
-    'UNKNOWN': 5,        # Exit code when workflow has unknown job states
+    'DONE': 0,               # Exit code when workflow is done
+    'FAIL': 1,               # Exit code when workflow has failed jobs
+    'RUNNING': 2,            # Exit code when workflow is still running
+    'STALLED': 3,            # Exit code when workflow is stalled
+    'UNAVAILABLE': 4,        # Exit code when workflow has unavailable jobs
+    'UNKNOWN': 5,            # Exit code when workflow has unknown job states
     'MAX_TIME_EXCEEDED': 6   # Exit code when maximum time exceeded
 }
 
