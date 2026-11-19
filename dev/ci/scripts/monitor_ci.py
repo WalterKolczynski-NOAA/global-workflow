@@ -92,7 +92,7 @@ def print_status(rocoto_status):
             status['ROCOTO_STATE'],
             f"{status['CYCLES_DONE']}/{status['CYCLES_TOTAL']}",
             str(status.get('RUNNING', '0')),
-            str(status.get('QUEUED', '0')),
+            str(status.get('QUEUED', 0) + status.get('SUBMITTING', 0)),
             str(status['DURATION']) if status.get('DURATION') is not None else 'N/A',
         ])
 
