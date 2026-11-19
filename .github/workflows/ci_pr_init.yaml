@@ -1,7 +1,7 @@
 name: PR CI Preface
 
 on:
-  # Use request target to prevent running GH actions modified by PR 
+  # Use request target to prevent running GH actions modified by PR
   pull_request_target:
     types: [opened, synchronize, reopened]
     paths-ignore:
@@ -49,10 +49,18 @@ jobs:
       machine: ursa
       pr_number: ${{ github.event.pull_request.number }}
       run_id: ${{ needs.get_short_sha.outputs.short_sha }}
-  hercules:    
+  hercules:
     uses: $/.github/workflows/ci_pr.yaml
     needs: get_short_sha
     with:
       machine: hercules
       pr_number: ${{ github.event.pull_request.number }}
       run_id: ${{ needs.get_short_sha.outputs.short_sha }}
+  gaeac6:
+    uses: $/.github/workflows/ci_pr.yaml
+    needs: get_short_sha
+    with:
+      machine: gaeac6
+      pr_number: ${{ github.event.pull_request.number }}
+      run_id: ${{ needs.get_short_sha.outputs.short_sha }}
+
