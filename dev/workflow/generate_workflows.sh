@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -x
-
 ###
 function _usage() {
     cat << EOF

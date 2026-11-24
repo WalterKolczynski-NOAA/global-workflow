@@ -64,7 +64,7 @@ set +e
 while true; do
 
     echo "Run rocotorun."
-    rocotorun -v "${ROCOTO_VERBOSE:-0}" -w "${xml}" -d "${db}" || continue
+    rocotorun -v "${ROCOTO_VERBOSE:-0}" -w "${xml}" -d "${db}"
 
     # Wait before running rocotostat
     sleep 60
@@ -114,5 +114,4 @@ while true; do
 
 done
 
-echo "Exit code: ${rc}"
 exit "${rc}"
