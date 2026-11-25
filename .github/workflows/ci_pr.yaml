@@ -1,5 +1,5 @@
 name: PR CI Pipeline
-#
+
 on:
   workflow_call:
     inputs:
@@ -29,7 +29,7 @@ env:
 
 jobs:
   gate:
-    # Requires approval by specific users before running
+    # Requires approval by specific users before running, as set in the GH environment
     name: Self-Hosted Gate
     runs-on: ubuntu-slim
     environment:

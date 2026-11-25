@@ -26,7 +26,7 @@ jobs:
         run: |
           echo "short_sha=${PR_HEAD_SHA::7}" >> "$GITHUB_OUTPUT"
 
-  # List all the possible machines to run CI on Two GH environments will need to
+  # List all the possible machines to run CI on. Two GH environments will need to
   # be created in the repo for each machine:
   #   - ${machine} Must contain an environment variable CI_RUN_ROOT containing
   #     the path where the CI should run
@@ -36,12 +36,11 @@ jobs:
   #
   # Self-hosted runners will also need to be established on each machine. They
   #   can be named anything (though it is recommended you use consecutive
-  #   numbers), but all must be labeled with the machine name. See <runner setup
-  #   script> to easily establish runners.
+  #   numbers), but all must be labeled with the machine name. See
+  #   https://github.com/NOAA-EPIC/gh_runner_utils to easily establish runners.
   #
   # Each machine has a separate approval, allowing some machines to be skipped
   #   if desired.
-  #
   ursa:
     uses: $/.github/workflows/ci_pr.yaml
     needs: get_short_sha
@@ -63,4 +62,3 @@ jobs:
       machine: gaeac6
       pr_number: ${{ github.event.pull_request.number }}
       run_id: ${{ needs.get_short_sha.outputs.short_sha }}
-
