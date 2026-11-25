@@ -316,7 +316,7 @@ def rocotostat_summary(rocotostat, thread_logging_enabled=False):
         # Convert cycle to a datetime object
         # Cycle should always be valid, so don't put in a try as exceptions should be raise
         # cycle isn't used yet, but retained for completeness
-        cycle = datetime.strptime(activated_str, "%Y%m%d%H%M")
+        cycle = datetime.strptime(cycle_str, "%Y%m%d%H%M")
 
         # Convert the activated time to a datetime object if it is valid
         activated = None
