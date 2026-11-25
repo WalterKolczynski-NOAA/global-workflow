@@ -8,9 +8,13 @@ from datetime import timedelta
 import pytest
 
 
+# Add script directory to the python path
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
 sys.path.insert(0, SCRIPTS_DIR)
+
+import monitor_ci  # noqa E402
+import utils.rocotostat as rs  # noqa E402
 
 
 class _DummyLogger:
@@ -36,9 +40,6 @@ _wxflow.Logger = _DummyLogger
 _wxflow.CommandNotFoundError = Exception
 _wxflow.ProcessError = Exception
 sys.modules.setdefault('wxflow', _wxflow)
-
-import monitor_ci
-import utils.rocotostat as rs
 
 
 def _status(state, cycles_done=0, cycles_total=1, running=0, queued=0, duration=None):
@@ -98,7 +99,7 @@ def test_check_end_states_exits_done():
     assert excinfo.value.code == rs.EXIT_CODE['DONE']
 
 
-@pytest.mark.parametrize('state', ['FAIL', 'ERROR', 'STALLED'])
+@pytest.mark.parametrize('state', ['FAIL', 'STALLED'])
 def test_check_end_states_exits_for_error_states(state):
     rocoto_status = {
         'exp1': _status('RUNNING', cycles_done=0, cycles_total=1, running=1),
@@ -108,8 +109,7 @@ def test_check_end_states_exits_for_error_states(state):
     with pytest.raises(SystemExit) as excinfo:
         monitor_ci.check_end_states(rocoto_status, consecutive_unavailable_count=0)
 
-    expected_exit_code = rs.EXIT_CODE['FAIL'] if state == 'ERROR' else rs.EXIT_CODE[state]
-    assert excinfo.value.code == expected_exit_code
+    assert excinfo.value.code == rs.EXIT_CODE[state]
 
 
 def test_check_end_states_increments_unavailable_count_without_exit():

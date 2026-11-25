@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+# Loops through all of the experiments found in given directory and calls
+# rocotorun on each. Then sleeps for SLEEP_DURATION until either all experiments
+# are successful, an experiment fails, or MAX_RUN_TIME is hit. Exits with 0 if
+# all experiments succeed, or a non-zero error code as defined in
+# utils.rocotostat depending on the mode of failure.
+
 from argparse import ArgumentParser
 from functools import partial
 import os
@@ -45,11 +51,11 @@ def input_args():
     """
 
     description = """
-        Using rocotostat to get the status of all jobs this scripts determines
-        rocoto_state: if all cycles are done, then rocoto_state is Done.
-        Assuming rocotorun had just been run, and the rocoto_state is not Done,
-        then rocoto_state is Stalled if there are no jobs that are RUNNING,
-        SUBMITTING, or QUEUED.
+        Loops through all of the experiments found in <expdir> and calls
+        rocotorun on each. Then sleeps for SLEEP_DURATION until either all
+        experiments are successful, an experiment fails, or MAX_RUN_TIME is hit.
+        Exits with 0 if all experiments succeed, or a non-zero error code as
+        defined in utils.rocotostat depending on the mode of failure.
         """
 
     parser = ArgumentParser(description=description)
@@ -63,7 +69,7 @@ def input_args():
     return args
 
 
-def print_status(rocoto_status):
+def print_status(rocoto_status: dict):
     """
     Print the status of the Rocoto workflow for each experiment.
 
@@ -114,15 +120,15 @@ def print_status(rocoto_status):
     print('')
 
 
-def check_end_states(rocoto_status, consecutive_unavailable_count):
+def check_end_states(rocoto_status: dict, consecutive_unavailable_count: int):
     """
     Check the end states of the Rocoto workflow and handle exit conditions.
 
     This function evaluates the status of each experiment's Rocoto workflow to
     determine if all experiments are done, if any have failed jobs, or if the
-    status is unavailable or unknown. It increments a counter for consecutive
-    unavailable or unknown states and exits the script with appropriate exit
-    codes based on the conditions met.
+    status is unavailable or unknown. If a terminal state is reached, the script
+    will exit with the appropriate code. Otherwise, the unavailable counter is
+    incremented or reset as appropriate.
 
     Parameters
     ----------
@@ -141,21 +147,20 @@ def check_end_states(rocoto_status, consecutive_unavailable_count):
 
     """
 
+    # If all experiments are DONE (successfully completed), we are done and can exit
     if all(status['ROCOTO_STATE'] == 'DONE' for status in rocoto_status.values()):
         logger.info("All experiments are done.")
         sys.exit(rs.EXIT_CODE['DONE'])
 
-    state_exit_codes = {
-        'FAIL': 'FAIL',
-        'ERROR': 'FAIL',
-        'STALLED': 'STALLED',
-    }
-
-    for state_name in ['FAIL', 'ERROR', 'STALLED']:
+    # If any experiment is FAIL or STALLED, exit as a failed test
+    for state_name in ['FAIL', 'STALLED']:
         if any(exp_status['ROCOTO_STATE'] == state_name for exp_status in rocoto_status.values()):
             logger.error(f"One or more experiments have {state_name.lower()} jobs.")
-            sys.exit(rs.EXIT_CODE[state_exit_codes[state_name]])
+            sys.exit(rs.EXIT_CODE[state_name])
 
+    # If any experiment state can't be determined (and nothing has failed),
+    # increment the counter and exit with error if the max number of consecutive
+    # unknown has been reached
     if any(status['ROCOTO_STATE'] in ['UNAVAILABLE', 'UNKNOWN'] for status in rocoto_status.values()):
         consecutive_unavailable_count += 1
         logger.warning(f"Rocoto status is unavailable or unknown for {consecutive_unavailable_count} consecutive checks.")
@@ -199,9 +204,12 @@ if __name__ == '__main__':
 
     start_time = datetime.now()
     logger.info(f'Monitoring started at: {start_time.strftime("%Y-%m-%d %H:%M:%S")}')
+    # Loop until the max runtime is reached as a failsafe
+    # In normal operation, script will end due to reaching a terminal state before this is reached
     while datetime.now() - start_time < MAX_RUN_TIME:
 
         rocoto_status = {}
+        # Run rocotorun and update status for each experiment.
         for experiment in experiments:
             logger.info(f'Updating {experiment}')
             experiment_path = os.path.join(args.expdir, experiment)
@@ -228,6 +236,7 @@ if __name__ == '__main__':
             except ProcessError as e:
                 logger.error(f"Error running rocoto for experiment {experiment}: {e}")
 
+        # Print the status to STDOUT so it appears in the GH Action
         print_status(rocoto_status)
 
         # Check for end states and remember how many times in a row the status
@@ -237,4 +246,5 @@ if __name__ == '__main__':
         logger.info(f'Sleeping for {SLEEP_DURATION} seconds before next check...')
         sleep(SLEEP_DURATION)
 
+    # The loop exited because the max time was reached
     sys.exit(rs.EXIT_CODE['MAX_TIME_EXCEEDED'])
