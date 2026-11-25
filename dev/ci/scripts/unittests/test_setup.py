@@ -99,7 +99,7 @@ def test_setup_workflow_fail_config_env_cornercase(tmp_path):
             contents = file.read()
         assert contents.count(account_value) > 5
 
-    except ProcessError as e:
+    except ProcessError:
         # We expect this fail becuse ACCOUNT=fv3-cpu in config.base and environment
         pass
 

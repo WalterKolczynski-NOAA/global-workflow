@@ -7,11 +7,11 @@ __pycache__
 *.sw[a-p]
 ._*
 .DS_Store
-#nohup.out - some users do not want this to be a part of .gitignore.  TODO: review against best practices
 .idea/
 .vscode/
 .venv/
 venv/
+#nohup.out - some users do not want this to be a part of .gitignore.  TODO: review against best practices
 nohup.out
 
 # Ignore editor generated backup files
@@ -216,3 +216,6 @@ versions/run.ver
 
 # jcb checkout and symlinks
 ush/python/jcb
+
+# Ignore pytest test data
+dev/ci/scripts/unittests/testdata
