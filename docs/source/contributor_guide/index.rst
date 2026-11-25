@@ -12,5 +12,4 @@ Table of Contents
 
    development.rst
    testing.rst
-   ci_cd_pipeline.rst
    wave.rst

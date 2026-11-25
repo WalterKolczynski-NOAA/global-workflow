@@ -2,13 +2,12 @@
 Global Workflow (GW) Documentation
 ##################################
 
-The **Global Workflow (GW)** is an end-to-end system designed to run global configurations of medium range weather forecasts for the Unified Forecast System (UFS) weather model. It is designed to support both development and operational implementations. 
+The **Global Workflow (GW)** is an end-to-end system designed to run global configurations of medium range weather forecasts for the Unified Forecast System (UFS) weather model. It is designed to support both development and operational implementations.
 
 =============
-Code managers
+Code manager
 =============
 
-* David Huber - @DavidHuber-NOAA / david.huber@noaa.gov
 * Travis Elless - @TravisElless-NOAA / travis.j.elless@noaa.gov
 
 =============
@@ -25,7 +24,7 @@ GW Documentation, Version 1.0
 
 .. toctree::
    :maxdepth: 2
-   
+
    quick_start.rst
 
 .. toctree::
