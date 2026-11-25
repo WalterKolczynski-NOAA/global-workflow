@@ -307,11 +307,18 @@ def rocotostat_summary(rocotostat, thread_logging_enabled=False):
 
     rocotostat_output = []
     for line in rocotostat_output_raw:
-        cycle = line[0:12].strip()
+        # rocotostat summary is fixed-width
+        cycle_str = line[0:12].strip()
         state = line[16:24].strip()
         activated_str = line[28:48].strip()
         deactivated_str = line[52:72].strip()
 
+        # Convert cycle to a datetime object
+        # Cycle should always be valid, so don't put in a try as exceptions should be raise
+        # cycle isn't used yet, but retained for completeness
+        cycle = datetime.strptime(activated_str, "%Y%m%d%H%M")
+
+        # Convert the activated time to a datetime object if it is valid
         activated = None
         if activated_str and activated_str != '-':
             try:
@@ -319,6 +326,7 @@ def rocotostat_summary(rocotostat, thread_logging_enabled=False):
             except ValueError:
                 activated = None
 
+        # Convert the deactivated time to a datetime object if it is valid
         deactivated = None
         if deactivated_str and deactivated_str != '-':
             try:
@@ -336,6 +344,7 @@ def rocotostat_summary(rocotostat, thread_logging_enabled=False):
     if _log_level == "DEBUG":
         logger.debug(rocotostat_output)
 
+    # Calculate the duration of the experiment based on the earliest activated cycle and latest deactivated cycle
     duration = (
         max(entry['deactivated'] for entry in rocotostat_output) - min(entry['activated'] for entry in rocotostat_output)
         if (
@@ -346,6 +355,7 @@ def rocotostat_summary(rocotostat, thread_logging_enabled=False):
         else None
     )
 
+    # Assemble the overall stats we want to return
     rocoto_status = {
         'CYCLES_TOTAL': len(rocotostat_output),
         'CYCLES_DONE': sum(1 for entry in rocotostat_output if entry['state'] == 'Done'),

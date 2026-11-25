@@ -11,11 +11,9 @@ from unittest.mock import Mock
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'utils'))
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
-from rocotostat import rocoto_statcount, rocotostat_summary, is_done, is_stalled
-from rocotostat import attempt_multiple_times, logger
-import rocotostat
+import rocotostat  # noqa #407
 
-from wxflow import which, CommandNotFoundError
+from wxflow import which, CommandNotFoundError  # noqa #407
 
 test_data_url = 'https://noaa-nws-global-pds.s3.amazonaws.com/data/CI/'
 
@@ -42,7 +40,7 @@ rocotostat_cmd.add_default_arg(['-w', os.path.join(testdata_path, 'workflow.xml'
 
 def test_rocoto_statcount():
 
-    result = rocoto_statcount(rocotostat_cmd)
+    result = rocotostat.rocoto_statcount(rocotostat_cmd)
 
     assert result['SUCCEEDED'] == 20
     assert result['FAIL'] == 0
@@ -54,7 +52,7 @@ def test_rocoto_statcount():
 
 def test_rocoto_summary():
 
-    result = rocotostat_summary(rocotostat_cmd)
+    result = rocotostat.rocotostat_summary(rocotostat_cmd)
 
     assert result['CYCLES_TOTAL'] == 1
     assert result['CYCLES_DONE'] == 1
@@ -62,9 +60,9 @@ def test_rocoto_summary():
 
 def test_rocoto_done():
 
-    result = rocotostat_summary(rocotostat_cmd)
+    result = rocotostat.rocotostat_summary(rocotostat_cmd)
 
-    assert is_done(result)
+    assert rocotostat.is_done(result)
 
     rmtree(testdata_full_path)
 
@@ -89,10 +87,10 @@ def test_rocoto_stalled():
     rocotostat_cmd = which('rocotostat')
     rocotostat_cmd.add_default_arg(['-w', xml, '-d', db])
 
-    result = rocoto_statcount(rocotostat_cmd)
+    result = rocotostat.rocoto_statcount(rocotostat_cmd)
 
     assert result['SUCCEEDED'] == 11
-    assert is_stalled(result)
+    assert rocotostat.is_stalled(result)
 
     rmtree(testdata_full_path)
 
@@ -102,7 +100,7 @@ def test_attempt_multiple_times_success_first_try(mocker):
     """Test that attempt_multiple_times succeeds on first try"""
     mock_func = mocker.Mock(return_value="success")
 
-    result = attempt_multiple_times(mock_func, max_attempts=3, sleep_duration=0.1)
+    result = rocotostat.attempt_multiple_times(mock_func, max_attempts=3, sleep_duration=0.1)
 
     assert result == "success"
     mock_func.assert_called_once()
@@ -112,7 +110,7 @@ def test_attempt_multiple_times_success_after_retries(mocker):
     """Test that attempt_multiple_times succeeds after some failures"""
     mock_func = mocker.Mock(side_effect=[Exception("fail"), Exception("fail"), "success"])
 
-    result = attempt_multiple_times(mock_func, max_attempts=3, sleep_duration=0.1)
+    result = rocotostat.attempt_multiple_times(mock_func, max_attempts=3, sleep_duration=0.1)
 
     assert result == "success"
     assert mock_func.call_count == 3
@@ -123,7 +121,7 @@ def test_attempt_multiple_times_max_attempts_exceeded(mocker):
     mock_func = mocker.Mock(side_effect=Exception("always fail"))
 
     try:
-        attempt_multiple_times(mock_func, max_attempts=2, sleep_duration=0.1)
+        rocotostat.attempt_multiple_times(mock_func, max_attempts=2, sleep_duration=0.1)
         assert False, "Expected Exception to be raised"
     except Exception as e:
         assert str(e) == "always fail"
@@ -136,7 +134,7 @@ def test_attempt_multiple_times_delay(mocker):
     mock_func = mocker.Mock(side_effect=[Exception("fail"), "success"])
 
     start_time = time.time()
-    result = attempt_multiple_times(mock_func, max_attempts=3, sleep_duration=0.2)
+    result = rocotostat.attempt_multiple_times(mock_func, max_attempts=3, sleep_duration=0.2)
     end_time = time.time()
 
     assert result == "success"
@@ -150,7 +148,7 @@ def test_attempt_multiple_times_logging(mocker):
     mock_logger = mocker.patch('rocotostat.logger')
     mock_func = mocker.Mock(side_effect=[Exception("fail"), "success"])
 
-    result = attempt_multiple_times(mock_func, max_attempts=3, sleep_duration=0.1)
+    result = rocotostat.attempt_multiple_times(mock_func, max_attempts=3, sleep_duration=0.1)
 
     assert result == "success"
     assert mock_func.call_count == 2
